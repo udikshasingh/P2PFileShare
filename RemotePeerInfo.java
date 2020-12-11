@@ -11,7 +11,7 @@ public class RemotePeerInfo implements Comparable<RemotePeerInfo>
 	public int isPreferredNeighbor = 0;
 	public int isOptUnchokedNeighbor = 0;
 	public int isChoked = 1;
-	public BitField bitField;
+	public BitOperation BitOperation;
 	public int state = -1;
 	public int peerIndex;
 	public int isCompleted = 0;
@@ -24,7 +24,7 @@ public class RemotePeerInfo implements Comparable<RemotePeerInfo>
 		peerId = pId;
 		peerAddress = pAddress;
 		peerPort = pPort;
-		bitField = new BitField();
+		BitOperation = new BitOperation();
 		peerIndex = pIndex;
 	}
 	public RemotePeerInfo(String pId, String pAddress, String pPort, int pIsFirstPeer, int pIndex)
@@ -33,7 +33,7 @@ public class RemotePeerInfo implements Comparable<RemotePeerInfo>
 		peerAddress = pAddress;
 		peerPort = pPort;
 		isFirstPeer = pIsFirstPeer;
-		bitField = new BitField();
+		BitOperation = new BitOperation();
 		peerIndex = pIndex;
 	}
 	public String getPeerId() {

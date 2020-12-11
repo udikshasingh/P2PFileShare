@@ -108,7 +108,7 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 	{
 		try 
 		{
-			out.write(DataMessage.encodeMessage(new DataMessage( DATA_MSG_REQUEST, ConversionUtil.intToByteArray(index))));
+			out.write(DataMessage.encodeMessage(new DataMessage( DATA_MSG_REQUEST, Converter.intToByteArr(index))));
 		} 
 		catch (IOException e) 
 		{
@@ -266,7 +266,7 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 				}
 				
 				// Sending BitField...
-				DataMessage d = new DataMessage(DATA_MSG_BITFIELD, peerProcess.ownBitField.encode());
+				DataMessage d = new DataMessage(DATA_MSG_BITFIELD, peerProcess.ownBitOperation.encode());
 				byte  []b = DataMessage.encodeMessage(d);  
 				out.write(b);
 				peerProcess.remotePeerInfoHash.get(remotePeerId).state = 8;
@@ -330,7 +330,8 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 					dataMsgWrapper.fromPeerID = this.remotePeerId;
 					peerProcess.addToMsgQueue(dataMsgWrapper);
 				}
-				else {
+				else 
+				{
 					int bytesAlreadyRead = 0;
 					int bytesRead;
 					byte []dataBuffPayload = new byte[dataMessage.getMessageLengthInt()-1];

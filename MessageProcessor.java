@@ -157,7 +157,7 @@ public class MessageProcessor implements Runnable, MessageConstants
 				 else if (msgType.equals(DATA_MSG_UNCHOKE)) {
 					// LOG 5:
 						peerProcess.showLog(peerProcess.peerID + " is UNCHOKED by Peer " + rPeerId);
-						int firstdiff = peerProcess.ownBitField.returnFirstDiff(peerProcess.remotePeerInfoHash.get(rPeerId).bitField);
+						int firstdiff = peerProcess.ownBitOperation.returnFirstDiff(peerProcess.remotePeerInfoHash.get(rPeerId).BitOperation);
 						if(firstdiff != -1)
 						{
 							//peerProcess.showLog(peerProcess.peerID + " is Requesting PIECE " + firstdiff + " from peer " + rPeerId);
@@ -181,9 +181,9 @@ public class MessageProcessor implements Runnable, MessageConstants
 						peerProcess.remotePeerInfoHash.get(rPeerId).dataRate = ((double)(buffer.length + DATA_MSG_LEN + DATA_MSG_TYPE)/(double)timeLapse) * 100;
 						
 						Piece p = Piece.decodePiece(buffer);
-						peerProcess.ownBitField.updateBitField(rPeerId, p);			
+						peerProcess.ownBitOperation.updateBitOperation(rPeerId, p);			
 						
-						int toGetPeiceIndex = peerProcess.ownBitField.returnFirstDiff(peerProcess.remotePeerInfoHash.get(rPeerId).bitField);
+						int toGetPeiceIndex = peerProcess.ownBitOperation.returnFirstDiff(peerProcess.remotePeerInfoHash.get(rPeerId).BitOperation);
 						if(toGetPeiceIndex != -1)
 						{
 							//peerProcess.showLog(peerProcess.peerID + " Requesting piece " + toGetPeiceIndex + " from peer " + rPeerId);
@@ -280,7 +280,7 @@ public class MessageProcessor implements Runnable, MessageConstants
 			pieceByte[i] = 0;
 		}
 
-		byte[] pieceIndexByte = ConversionUtil.intToByteArray(pieceNo);
+		byte[] pieceIndexByte = Converter.intToByteArr(pieceNo);
 		System.arraycopy(pieceIndexByte, 0, pieceByte, 0,
 						pieceIndexByte.length);
 		DataMessage d = new DataMessage(DATA_MSG_REQUEST, pieceByte);
@@ -296,7 +296,7 @@ public class MessageProcessor implements Runnable, MessageConstants
 	private void sendPeice(Socket socket, DataMessage d, String remotePeerID)  //d == requestmessage
 	{
 		byte[] bytePieceIndex = d.getPayload();
-		int pieceIndex = ConversionUtil.byteArrayToInt(bytePieceIndex);
+		int pieceIndex = Converter.byteArrToInt(bytePieceIndex);
 		
 		peerProcess.showLog(peerProcess.peerID + " sending a PIECE message for piece " + pieceIndex + " to Peer " + remotePeerID);
 		
@@ -363,10 +363,10 @@ public class MessageProcessor implements Runnable, MessageConstants
 //  Compare the bitfield and send TRUE if there is any extra data	
 	private boolean isInterested(DataMessage d, String rPeerId) {		
 		
-		BitField b = BitField.decode(d.getPayload());
-		peerProcess.remotePeerInfoHash.get(rPeerId).bitField = b;
+		BitOperation b = BitOperation.decode(d.getPayload());
+		peerProcess.remotePeerInfoHash.get(rPeerId).BitOperation = b;
 
-		if(peerProcess.ownBitField.compare(b))return true;
+		if(peerProcess.ownBitOperation.compare(b))return true;
 		return false;
 	}
 
@@ -388,7 +388,7 @@ public class MessageProcessor implements Runnable, MessageConstants
 	private void sendBitField(Socket socket, String remotePeerID) {
 	
 		peerProcess.showLog(peerProcess.peerID + " sending BITFIELD message to Peer " + remotePeerID);
-		byte[] encodedBitField = peerProcess.ownBitField.encode();
+		byte[] encodedBitField = peerProcess.ownBitOperation.encode();
 
 		DataMessage d = new DataMessage(DATA_MSG_BITFIELD, encodedBitField);
 		SendData(socket,DataMessage.encodeMessage(d));
@@ -400,7 +400,7 @@ public class MessageProcessor implements Runnable, MessageConstants
 	private void sendHave(Socket socket, String remotePeerID) {
 		
 		peerProcess.showLog(peerProcess.peerID + " sending HAVE message to Peer " + remotePeerID);
-		byte[] encodedBitField = peerProcess.ownBitField.encode();
+		byte[] encodedBitField = peerProcess.ownBitOperation.encode();
 		DataMessage d = new DataMessage(DATA_MSG_HAVE, encodedBitField);
 		SendData(socket,DataMessage.encodeMessage(d));
 		

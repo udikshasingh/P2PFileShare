@@ -82,12 +82,12 @@ public class DataMessage implements MessageConstants
     public void setMessageLength(int messageLength) {
         this.dataLength = messageLength;
         this.messageLength = ((Integer)messageLength).toString();
-        this.len = ConversionUtil.intToByteArray(messageLength);
+        this.len = Converter.intToByteArr(messageLength);
     }
 	
 	public void setMessageLength(byte[] len) {
 
-		Integer l = ConversionUtil.byteArrayToInt(len);
+		Integer l = Converter.byteArrToInt(len);
 		this.messageLength = l.toString();
 		this.len = len;
 		this.dataLength = l;  
@@ -236,7 +236,7 @@ public class DataMessage implements MessageConstants
 			msg.setMessageLength(msgLength);
 			msg.setMessageType(msgType);
 			
-			len = ConversionUtil.byteArrayToInt(msgLength);
+			len = Converter.byteArrToInt(msgLength);
 			
 			if (len > 1) 
 			{

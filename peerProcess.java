@@ -10,7 +10,7 @@ public class peerProcess implements MessageConstants
 	public int myPeerIndex;
 	public Thread listeningThread; // Thread for listening to remote clients
 	public static boolean isFinished = false;
-	public static BitField ownBitField = null;
+	public static BitOperation ownBitOperation = null;
 	public static volatile Timer timerPref;
 	public static volatile Timer timerUnChok;
 	public static volatile Hashtable<String, RemotePeerInfo> remotePeerInfoHash = new Hashtable<String, RemotePeerInfo>();
@@ -167,7 +167,7 @@ public class peerProcess implements MessageConstants
 		SendData(socket, msgByte);
 	}
 	private static void sendHave(Socket socket, String remotePeerID) {
-		byte[] encodedBitField = peerProcess.ownBitField.encode();
+		byte[] encodedBitField = peerProcess.ownBitOperation.encode();
 		showLog(peerID + " sending HAVE message to Peer " + remotePeerID);
 		DataMessage d = new DataMessage(DATA_MSG_HAVE, encodedBitField);
 		SendData(socket,DataMessage.encodeMessage(d));
@@ -374,8 +374,8 @@ public class peerProcess implements MessageConstants
 			}
 			
 			// Initialize the Bit field class 
-			ownBitField = new BitField();
-			ownBitField.initOwnBitfield(peerID, isFirstPeer?1:0);
+			ownBitOperation = new BitOperation();
+			ownBitOperation.initOwnBitOperation(peerID, isFirstPeer?1:0);
 			
 			messageProcessor = new Thread(new MessageProcessor(peerID));
 			messageProcessor.start();
