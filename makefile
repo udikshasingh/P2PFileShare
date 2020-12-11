@@ -6,7 +6,7 @@ JFLAGS = -g
 
 CLASSES = \
 	BitField.java \
-	CommonProperties.java \
+	Configurations.java \
 	ConversionUtil.java \
 	DataMessage.java \
 	DataMessageWrapper.java \

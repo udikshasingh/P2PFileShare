@@ -266,7 +266,7 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 				}
 				
 				// Sending BitField...
-				DataMessage d = new DataMessage(DATA_MSG_BITFIELD, peerProcess.ownBitField.encode());
+				DataMessage d = new DataMessage(DATA_MSG_BITFIELD, peerProcess.bit.encode());
 				byte  []b = DataMessage.encodeMessage(d);  
 				out.write(b);
 				peerProcess.peersMap.get(remotePeerId).state = 8;

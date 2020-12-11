@@ -5,7 +5,7 @@ public class RemotePeerInfo implements Comparable<RemotePeerInfo>
 	public String peerId;
 	public String peerAddress;
 	public String peerPort;
-	public int isFirstPeer;
+	public boolean isPrimary;
 	public double dataRate = 0;
 	public int isInterested = 1;
 	public int isPreferredNeighbor = 0;
@@ -13,7 +13,7 @@ public class RemotePeerInfo implements Comparable<RemotePeerInfo>
 	public int isChoked = 1;
 	public BitField bitField;
 	public int state = -1;
-	public int peerIndex;
+	public int serialNo;
 	public int isCompleted = 0;
 	public int isHandShaked = 0;
 	public Date startTime;
@@ -25,16 +25,16 @@ public class RemotePeerInfo implements Comparable<RemotePeerInfo>
 		peerAddress = pAddress;
 		peerPort = pPort;
 		bitField = new BitField();
-		peerIndex = pIndex;
+		serialNo = pIndex;
 	}
-	public RemotePeerInfo(String pId, String pAddress, String pPort, int pIsFirstPeer, int pIndex)
+	public RemotePeerInfo(String pId, String pAddress, String pPort, boolean pIsFirstPeer, int pIndex)
 	{
 		peerId = pId;
 		peerAddress = pAddress;
 		peerPort = pPort;
-		isFirstPeer = pIsFirstPeer;
+		isPrimary = pIsFirstPeer;
 		bitField = new BitField();
-		peerIndex = pIndex;
+		serialNo = pIndex;
 	}
 	public String getPeerId() {
 		return peerId;
@@ -54,12 +54,12 @@ public class RemotePeerInfo implements Comparable<RemotePeerInfo>
 	public void setPeerPort(String peerPort) {
 		this.peerPort = peerPort;
 	}
-	public int getIsFirstPeer() {
-		return isFirstPeer;
-	}
-	public void setIsFirstPeer(int isFirstPeer) {
-		this.isFirstPeer = isFirstPeer;
-	}
+//	public int getIsFirstPeer() {
+//		return isPrimary;
+//	}
+//	public void setIsFirstPeer(int isFirstPeer) {
+//		this.isPrimary = isFirstPeer;
+//	}
 	public int compareTo(RemotePeerInfo o1) {
 		
 		if (this.dataRate > o1.dataRate) 

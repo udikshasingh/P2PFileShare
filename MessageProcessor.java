@@ -101,7 +101,7 @@ public class MessageProcessor implements Runnable, MessageConstants
 					peerProcess.peersMap.get(rPeerId).isInterested = 1;
 					peerProcess.peersMap.get(rPeerId).isHandShaked = 1;
 					
-					if(!peerProcess.preferedNeighbors.containsKey(rPeerId) && !peerProcess.unchokedNeighbors.containsKey(rPeerId))
+					if(!peerProcess.prefMap.containsKey(rPeerId) && !peerProcess.unchokedNeighbors.containsKey(rPeerId))
 					{
 						sendChoke(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
 						peerProcess.peersMap.get(rPeerId).isChoked = 1;
@@ -121,7 +121,7 @@ public class MessageProcessor implements Runnable, MessageConstants
 					//peerProcess.showLog(peerProcess.peerID + " receieved a REQUEST message from Peer " + rPeerId);
 						sendPeice(peerProcess.peerIDToSocketMap.get(rPeerId), d, rPeerId);
 						// Decide to send CHOKE or UNCHOKE message
-						if(!peerProcess.preferedNeighbors.containsKey(rPeerId) && !peerProcess.unchokedNeighbors.containsKey(rPeerId))
+						if(!peerProcess.prefMap.containsKey(rPeerId) && !peerProcess.unchokedNeighbors.containsKey(rPeerId))
 						{
 							sendChoke(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
 							peerProcess.peersMap.get(rPeerId).isChoked = 1;
@@ -157,7 +157,7 @@ public class MessageProcessor implements Runnable, MessageConstants
 				 else if (msgType.equals(DATA_MSG_UNCHOKE)) {
 					// LOG 5:
 						peerProcess.showLog(peerProcess.peerId + " is UNCHOKED by Peer " + rPeerId);
-						int firstdiff = peerProcess.ownBitField.returnFirstDiff(peerProcess.peersMap.get(rPeerId).bitField);
+						int firstdiff = peerProcess.bit.returnFirstDiff(peerProcess.peersMap.get(rPeerId).bitField);
 						if(firstdiff != -1)
 						{
 							//peerProcess.showLog(peerProcess.peerID + " is Requesting PIECE " + firstdiff + " from peer " + rPeerId);
@@ -181,9 +181,9 @@ public class MessageProcessor implements Runnable, MessageConstants
 						peerProcess.peersMap.get(rPeerId).dataRate = ((double)(buffer.length + DATA_MSG_LEN + DATA_MSG_TYPE)/(double)timeLapse) * 100;
 						
 						Piece p = Piece.decodePiece(buffer);
-						peerProcess.ownBitField.updateBitField(rPeerId, p);			
+						peerProcess.bit.updateBitField(rPeerId, p);			
 						
-						int toGetPeiceIndex = peerProcess.ownBitField.returnFirstDiff(peerProcess.peersMap.get(rPeerId).bitField);
+						int toGetPeiceIndex = peerProcess.bit.returnFirstDiff(peerProcess.peersMap.get(rPeerId).bitField);
 						if(toGetPeiceIndex != -1)
 						{
 							//peerProcess.showLog(peerProcess.peerID + " Requesting piece " + toGetPeiceIndex + " from peer " + rPeerId);
@@ -366,7 +366,7 @@ public class MessageProcessor implements Runnable, MessageConstants
 		BitField b = BitField.decode(d.getPayload());
 		peerProcess.peersMap.get(rPeerId).bitField = b;
 
-		if(peerProcess.ownBitField.compare(b))return true;
+		if(peerProcess.bit.compare(b))return true;
 		return false;
 	}
 
@@ -388,7 +388,7 @@ public class MessageProcessor implements Runnable, MessageConstants
 	private void sendBitField(Socket socket, String remotePeerID) {
 	
 		peerProcess.showLog(peerProcess.peerId + " sending BITFIELD message to Peer " + remotePeerID);
-		byte[] encodedBitField = peerProcess.ownBitField.encode();
+		byte[] encodedBitField = peerProcess.bit.encode();
 
 		DataMessage d = new DataMessage(DATA_MSG_BITFIELD, encodedBitField);
 		SendData(socket,DataMessage.encodeMessage(d));
@@ -400,7 +400,7 @@ public class MessageProcessor implements Runnable, MessageConstants
 	private void sendHave(Socket socket, String remotePeerID) {
 		
 		peerProcess.showLog(peerProcess.peerId + " sending HAVE message to Peer " + remotePeerID);
-		byte[] encodedBitField = peerProcess.ownBitField.encode();
+		byte[] encodedBitField = peerProcess.bit.encode();
 		DataMessage d = new DataMessage(DATA_MSG_HAVE, encodedBitField);
 		SendData(socket,DataMessage.encodeMessage(d));
 		

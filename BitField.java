@@ -206,7 +206,7 @@ public class BitField implements MessageConstants
 	public synchronized void updateBitField(String peerId, Piece piece) {
 		try 
 		{
-			if (peerProcess.ownBitField.pieces[piece.pieceIndex].isPresent == 1) {
+			if (peerProcess.bit.pieces[piece.pieceIndex].isPresent == 1) {
 				peerProcess.showLog(peerId + " Piece already received!!");
 			} 
 			else 
@@ -229,9 +229,9 @@ public class BitField implements MessageConstants
 						+ " has downloaded the PIECE " + piece.pieceIndex
 						+ " from Peer " + peerId
 						+ ". Now the number of pieces it has is "
-						+ peerProcess.ownBitField.ownPieces());
+						+ peerProcess.bit.ownPieces());
 
-				if (peerProcess.ownBitField.isCompleted()) {
+				if (peerProcess.bit.isCompleted()) {
 					peerProcess.peersMap.get(peerProcess.peerId).isInterested = 0;
 					peerProcess.peersMap.get(peerProcess.peerId).isCompleted = 1;
 					peerProcess.peersMap.get(peerProcess.peerId).isChoked = 0;

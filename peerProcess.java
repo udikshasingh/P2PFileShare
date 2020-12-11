@@ -3,24 +3,26 @@ import java.net.*;
 import java.util.*;
 public class peerProcess implements MessageConstants
 {
-	public ServerSocket listeningSocket = null;
-	public int LISTENING_PORT;
-	public String PEER_IP = null;
-	public static String peerId;
-	public int myPeerIndex;
-	public Thread listeningThread; // Thread for listening to remote clients
-	public static boolean isFinished = false;
-	public static BitField ownBitField = null;
-	public static volatile Timer timerPref;
-	public static volatile Timer timerUnChok;
 	public static Map<String, RemotePeerInfo> peersMap = new HashMap<>();
-	public static volatile Hashtable<String, RemotePeerInfo> preferedNeighbors = new Hashtable<String, RemotePeerInfo>();
+	public static Map<String, RemotePeerInfo> prefMap = new HashMap<>();
+	
+	public ServerSocket socket = null;
+	public int portNo;
+	//public String PEER_IP = null;
+	public static String peerId;
+	public int serialNo;
+	public Thread server; 
+	public static boolean completed = false;
+	public static BitField bit = null;
+	public static Timer timer;
+	public static volatile Timer timerUnChok;
+	
 	public static volatile Hashtable<String, RemotePeerInfo> unchokedNeighbors = new Hashtable<String, RemotePeerInfo>();
 	public static volatile Queue<DataMessageWrapper> messageQ = new LinkedList<DataMessageWrapper>();
 	public static Hashtable<String, Socket> peerIDToSocketMap = new Hashtable<String, Socket>();
-	public static Vector<Thread> receivingThread = new Vector<Thread>();
+	public static List<Thread> listeners = new ArrayList<Thread>();
 	public static Vector<Thread> sendingThread = new Vector<Thread>();
-	public static Thread messageProcessor;
+	public static Thread mainThread;
 	public static synchronized void addToMsgQueue(DataMessageWrapper msg)
 	{
 		messageQ.add(msg);
@@ -64,101 +66,101 @@ public class peerProcess implements MessageConstants
 	 * Class that handles the preferred neighbors information
 	 * Adding the preferred neighbors with highest data rate to the corresponding list
 	 */
-	public static class PreferedNeighbors extends TimerTask {
-		public void run() 
-		{
-			//updates remotePeerInfoHash
-			readPeerInfoAgain();
-			//Enumeration<String> keys = peersMap.keys();
-			int countInterested = 0;
-			String strPref = "";
-			for(String key : peersMap.keySet())
-			{
-				//String key = (String)keys.nextElement();
-				RemotePeerInfo pref = peersMap.get(key);
-				if(key.equals(peerId))continue;
-				if (pref.isCompleted == 0 && pref.isHandShaked == 1)
-				{
-					countInterested++;
-				} 
-				else if(pref.isCompleted == 1)
-				{
-					try
-					{
-						preferedNeighbors.remove(key);
-					}
-					catch (Exception e) {
-					}
-				}
-			}
-			if(countInterested > Configurations.numberOfPreferredNeighbors)
-			{
-				boolean flag = preferedNeighbors.isEmpty();
-				if(!flag)
-					preferedNeighbors.clear();
-				List<RemotePeerInfo> pv = new ArrayList<RemotePeerInfo>(peersMap.values());
-				Collections.sort(pv, new PeerDataRateComparator(false));
-				int count = 0;
-				for (int i = 0; i < pv.size(); i++) 
-				{
-					if (count > Configurations.numberOfPreferredNeighbors - 1)
-						break;
-					if(pv.get(i).isHandShaked == 1 && !pv.get(i).peerId.equals(peerId) 
-							&& peersMap.get(pv.get(i).peerId).isCompleted == 0)
-					{
-						peersMap.get(pv.get(i).peerId).isPreferredNeighbor = 1;
-						preferedNeighbors.put(pv.get(i).peerId, peersMap.get(pv.get(i).peerId));
-						
-						count++;
-						
-						strPref = strPref + pv.get(i).peerId + ", ";
-						
-						if (peersMap.get(pv.get(i).peerId).isChoked == 1)
-						{
-							sendUnChoke(peerProcess.peerIDToSocketMap.get(pv.get(i).peerId), pv.get(i).peerId);
-							peerProcess.peersMap.get(pv.get(i).peerId).isChoked = 0;
-							sendHave(peerProcess.peerIDToSocketMap.get(pv.get(i).peerId), pv.get(i).peerId);
-							peerProcess.peersMap.get(pv.get(i).peerId).state = 3;
-						}
-						
-						
-					}
-				}
-			}
-			else
-			{
-				//keys = peersMap.keys();
-				for (String key : peersMap.keySet())
-				{
-					//String key = (String)keys.nextElement();
-					RemotePeerInfo pref = peersMap.get(key);
-					if(key.equals(peerId)) continue;
-					
-					if (pref.isCompleted == 0 && pref.isHandShaked == 1)
-					{
-						if(!preferedNeighbors.containsKey(key))
-						{
-							strPref = strPref + key + ", ";
-							preferedNeighbors.put(key, peersMap.get(key));
-							peersMap.get(key).isPreferredNeighbor = 1;
-						}
-						if (pref.isChoked == 1)
-						{
-							sendUnChoke(peerProcess.peerIDToSocketMap.get(key), key);
-							peerProcess.peersMap.get(key).isChoked = 0;
-							sendHave(peerProcess.peerIDToSocketMap.get(key), key);
-							peerProcess.peersMap.get(key).state = 3;
-						}
-						
-					} 
-					
-				}
-			}
-			// LOG 3: Preferred Neighbors 
-			if (strPref != "")
-				peerProcess.showLog(peerProcess.peerId + " has selected the preferred neighbors - " + strPref);
-		}
-	}
+//	public static class PreferedNeighbors extends TimerTask {
+//		public void run() 
+//		{
+//			//updates remotePeerInfoHash
+//			readPeerInfoAgain();
+//			//Enumeration<String> keys = peersMap.keys();
+//			int countInterested = 0;
+//			String strPref = "";
+//			for(String key : peersMap.keySet())
+//			{
+//				//String key = (String)keys.nextElement();
+//				RemotePeerInfo pref = peersMap.get(key);
+//				if(key.equals(peerId))continue;
+//				if (pref.isCompleted == 0 && pref.isHandShaked == 1)
+//				{
+//					countInterested++;
+//				} 
+//				else if(pref.isCompleted == 1)
+//				{
+//					try
+//					{
+//						prefMap.remove(key);
+//					}
+//					catch (Exception e) {
+//					}
+//				}
+//			}
+//			if(countInterested > Configurations.numberOfPreferredNeighbors)
+//			{
+//				boolean flag = prefMap.isEmpty();
+//				if(!flag)
+//					prefMap.clear();
+//				List<RemotePeerInfo> pv = new ArrayList<RemotePeerInfo>(peersMap.values());
+//				Collections.sort(pv, new PeerDataRateComparator(false));
+//				int count = 0;
+//				for (int i = 0; i < pv.size(); i++) 
+//				{
+//					if (count > Configurations.numberOfPreferredNeighbors - 1)
+//						break;
+//					if(pv.get(i).isHandShaked == 1 && !pv.get(i).peerId.equals(peerId) 
+//							&& peersMap.get(pv.get(i).peerId).isCompleted == 0)
+//					{
+//						peersMap.get(pv.get(i).peerId).isPreferredNeighbor = 1;
+//						prefMap.put(pv.get(i).peerId, peersMap.get(pv.get(i).peerId));
+//						
+//						count++;
+//						
+//						strPref = strPref + pv.get(i).peerId + ", ";
+//						
+//						if (peersMap.get(pv.get(i).peerId).isChoked == 1)
+//						{
+//							sendUnChoke(peerProcess.peerIDToSocketMap.get(pv.get(i).peerId), pv.get(i).peerId);
+//							peerProcess.peersMap.get(pv.get(i).peerId).isChoked = 0;
+//							sendHave(peerProcess.peerIDToSocketMap.get(pv.get(i).peerId), pv.get(i).peerId);
+//							peerProcess.peersMap.get(pv.get(i).peerId).state = 3;
+//						}
+//						
+//						
+//					}
+//				}
+//			}
+//			else
+//			{
+//				//keys = peersMap.keys();
+//				for (String key : peersMap.keySet())
+//				{
+//					//String key = (String)keys.nextElement();
+//					RemotePeerInfo pref = peersMap.get(key);
+//					if(key.equals(peerId)) continue;
+//					
+//					if (pref.isCompleted == 0 && pref.isHandShaked == 1)
+//					{
+//						if(!prefMap.containsKey(key))
+//						{
+//							strPref = strPref + key + ", ";
+//							prefMap.put(key, peersMap.get(key));
+//							peersMap.get(key).isPreferredNeighbor = 1;
+//						}
+//						if (pref.isChoked == 1)
+//						{
+//							sendUnChoke(peerProcess.peerIDToSocketMap.get(key), key);
+//							peerProcess.peersMap.get(key).isChoked = 0;
+//							sendHave(peerProcess.peerIDToSocketMap.get(key), key);
+//							peerProcess.peersMap.get(key).state = 3;
+//						}
+//						
+//					} 
+//					
+//				}
+//			}
+//			// LOG 3: Preferred Neighbors 
+//			if (strPref != "")
+//				peerProcess.showLog(peerProcess.peerId + " has selected the preferred neighbors - " + strPref);
+//		}
+//	}
 	
 	private static void sendUnChoke(Socket socket, String remotePeerID) {
 		showLog(peerId + " is sending UNCHOKE message to remote Peer " + remotePeerID);
@@ -167,7 +169,7 @@ public class peerProcess implements MessageConstants
 		SendData(socket, msgByte);
 	}
 	private static void sendHave(Socket socket, String remotePeerID) {
-		byte[] encodedBitField = peerProcess.ownBitField.encode();
+		byte[] encodedBitField = peerProcess.bit.encode();
 		showLog(peerId + " sending HAVE message to Peer " + remotePeerID);
 		DataMessage d = new DataMessage(DATA_MSG_HAVE, encodedBitField);
 		SendData(socket,DataMessage.encodeMessage(d));
@@ -184,12 +186,7 @@ public class peerProcess implements MessageConstants
 		return 1;
 	}
 
-	/**
-	 * Class that handles the Optimistically unchoked neigbhbors information
-	 * 1. Adding the Optimistically unchoked neighors to the corresponding
-	 * list; here it is taken as the first neighbor which is in choked state
-	 * 
-	 */
+
 	public static class UnChokedNeighbors extends TimerTask {
 
 		public void run() 
@@ -235,102 +232,14 @@ public class peerProcess implements MessageConstants
 
 	}
 
-	/**
-	 * Methods to start and stop the Prefered Neighbors and Optimistically
-	 * unchoked neigbhbors update threads
-	 */
-	public static void startUnChokedNeighbors() 
-	{
-		timerPref = new Timer();
-		timerPref.schedule(new UnChokedNeighbors(),
-				Configurations.optimisticUnchokingInterval * 1000 * 0,
-				Configurations.optimisticUnchokingInterval * 1000);
-	}
-
-	public static void stopUnChokedNeighbors() {
-		timerPref.cancel();
-	}
-
-	public static void startPreferredNeighbors() {
-		timerPref = new Timer();
-		timerPref.schedule(new PreferedNeighbors(),
-				Configurations.unchokingInterval * 1000 * 0,
-				Configurations.unchokingInterval * 1000);
-	}
-
-	public static void stopPreferredNeighbors() {
-		timerPref.cancel();
-	}
-
-	/**
-	 * Generates log message in following format
-	 * [Time]: Peer [peer_ID] [message]
-	 * @param message
-	 */
+	
 	public static void showLog(String message)
 	{
 		LogGenerator.writeLog(DateUtil.getTime() + ": Peer " + message);
 		System.out.println(DateUtil.getTime() + ": Peer " + message);
 	}
 	
-	/**
-	 * Reads the system details from the Common.cfg file 
-	 * and populates to CommonProperties class static variables 
-	 */
-//	public static void readCommonProperties() {
-//		String line;
-//		try {
-//			BufferedReader in = new BufferedReader(new FileReader("Common.cfg"));
-//			while ((line = in.readLine()) != null) {
-//				String[] tokens = line.split("\\s+");
-//				if (tokens[0].equalsIgnoreCase("NumberOfPreferredNeighbors")) {
-//					CommonProperties.numOfPreferredNeighbr = Integer
-//							.parseInt(tokens[1]);
-//				} else if (tokens[0].equalsIgnoreCase("UnchokingInterval")) {
-//					CommonProperties.unchokingInterval = Integer
-//							.parseInt(tokens[1]);
-//				} else if (tokens[0]
-//						.equalsIgnoreCase("OptimisticUnchokingInterval")) {
-//					CommonProperties.optUnchokingInterval = Integer
-//							.parseInt(tokens[1]);
-//				} else if (tokens[0].equalsIgnoreCase("FileName")) {
-//					CommonProperties.fileName = tokens[1];
-//				} else if (tokens[0].equalsIgnoreCase("FileSize")) {
-//					CommonProperties.fileSize = Integer.parseInt(tokens[1]);
-//				} else if (tokens[0].equalsIgnoreCase("PieceSize")) {
-//					CommonProperties.pieceSize = Integer.parseInt(tokens[1]);
-//				}
-//			}
-//
-//			in.close();
-//		} catch (Exception ex) {
-//			showLog(peerId + ex.toString());
-//		}
-//	}
-
-	/**
-	 * Reads the Peer details from the PeerInfo.cfg file 
-	 * and populates to peerInfoVector vector
-	 */
-	public static void readPeerInfo() {
-		String st;
-		try {
-			BufferedReader in = new BufferedReader(new FileReader("PeerInfo.cfg"));
-			int i = 0;
-			while ((st = in.readLine()) != null) {
-				String[] tokens = st.split("\\s+");
-				peersMap.put(tokens[0], new RemotePeerInfo(tokens[0],
-						tokens[1], tokens[2], Integer.parseInt(tokens[3]), i));
-				i++;
-			}
-			in.close();
-		} catch (Exception ex) {
-			showLog(peerId + ex.toString());
-		}
-	}
 	
-	
-
 	
 	//@SuppressWarnings("deprecation")
 	@SuppressWarnings("deprecation")
@@ -367,7 +276,6 @@ public class peerProcess implements MessageConstants
 			} catch (Exception e) {
 				showLog(peerId + e.toString());
 			}
-			//readPeerInfo();
 			
 			try {
 				BufferedReader br = new BufferedReader(new FileReader("PeerInfo.cfg"));
@@ -375,136 +283,140 @@ public class peerProcess implements MessageConstants
 				String str;
 				while ((str = br.readLine()) != null) {
 					String[] configs = str.split("\\s+");
-					peersMap.put(configs[0], new RemotePeerInfo(configs[0],configs[1], configs[2], Integer.parseInt(configs[3]), i));
+					boolean flag = (Integer.parseInt(configs[3]) == 1) ? true : false;
+					peersMap.put(configs[0], new RemotePeerInfo(configs[0],configs[1], configs[2], flag, i));
 					i++;
 				}
 				br.close();
-			} catch (Exception ex) {
-				showLog(peerId + ex.toString());
+			} catch (Exception e) {
+				showLog(peerId + e.toString());
+			}
+						
+			for (String key : peersMap.keySet()) {
+				if(!key.equals(peerId))
+					prefMap.put(key, peersMap.get(key));		
 			}
 			
-			// for the initial calculation
-			initializePrefferedNeighbours();
-			
-			boolean isFirstPeer = false;
+			boolean isPrimary = false;
 
-			//Enumeration<String> e = peersMap.keys();
 			
 			for (String key : peersMap.keySet())
 			{
-				RemotePeerInfo peerInfo = peersMap.get(key);
-				if(peerInfo.peerId.equals(peerId))
+				RemotePeerInfo remotePeerInfo = peersMap.get(key);
+				if(remotePeerInfo.peerId.equals(peerId))
 				{
-					// checks if the peer is the first peer or not
-					peerProcess.LISTENING_PORT = Integer.parseInt(peerInfo.peerPort);
-					peerProcess.myPeerIndex = peerInfo.peerIndex;
-					if(peerInfo.getIsFirstPeer() == 1)
-					{
-						isFirstPeer = true;
+					peerProcess.portNo = Integer.parseInt(remotePeerInfo.peerPort);
+					peerProcess.serialNo = remotePeerInfo.serialNo;
+					if(remotePeerInfo.isPrimary) {
+						isPrimary = true;
 						break;
 					}
 				}
 			}
 			
-			// Initialize the Bit field class 
-			ownBitField = new BitField();
-			ownBitField.initOwnBitfield(peerId, isFirstPeer?1:0);
+			bit = new BitField();
+			int flag = isPrimary?1:0;
+			bit.initOwnBitfield(peerId, flag);
 			
-			messageProcessor = new Thread(new MessageProcessor(peerId));
-			messageProcessor.start();
+			mainThread = new Thread(new MessageProcessor(peerId));
+			mainThread.start();
 			
-			if(isFirstPeer)
+			if(isPrimary)
 			{
 				try
 				{
-					peerProcess.listeningSocket = new ServerSocket(peerProcess.LISTENING_PORT);
-					
-					//instantiates and starts Listening Thread
-					peerProcess.listeningThread = new Thread(new ListeningThread(peerProcess.listeningSocket, peerId));
-					peerProcess.listeningThread.start();
+					peerProcess.socket = new ServerSocket(peerProcess.portNo);
+					peerProcess.server = new Thread(new ListeningThread(peerProcess.socket, peerId));
+					peerProcess.server.start();
 				}
-				catch(SocketTimeoutException tox)
+				catch(SocketTimeoutException e)
 				{
-					showLog(peerId + " gets time out expetion: " + tox.toString());
+					showLog(peerId + e.toString());
 					LogGenerator.stop();
 					System.exit(0);
 				}
-				catch(IOException ex)
+				catch(IOException e)
 				{
-					showLog(peerId + " gets exception in Starting Listening thread: " + peerProcess.LISTENING_PORT + ex.toString());
+					showLog(peerId + e.toString());
 					LogGenerator.stop();
 					System.exit(0);
 				}
 			}
-			// Not the first peer
 			else
 			{	
-				createEmptyFile();
-				
-				//e = peersMap.keys();
+				try {
+
+					File dataFile = new File(peerId, Configurations.fileName);
+					OutputStream outputstream = new FileOutputStream(dataFile, true);
+					byte data = 0;
+					int size = Configurations.fileSize;
+					for (int i = 0; i < size; i++)
+						outputstream.write(data);
+						outputstream.close();
+				} 
+				catch (Exception e) {
+					showLog(peerId + " Error in making the file : " + e.getMessage());
+				}
 				for (String key : peersMap.keySet())
 				{
 					RemotePeerInfo peerInfo = peersMap.get(key);
-					if(peerProcess.myPeerIndex > peerInfo.peerIndex)
+					if(peerProcess.serialNo > peerInfo.serialNo)
 					{
-						Thread tempThread = new Thread(new RemotePeerHandler(
-								peerInfo.getPeerAddress(), Integer
-										.parseInt(peerInfo.getPeerPort()), 1,
-										peerId));
-						receivingThread.add(tempThread);
-						tempThread.start();
+						String ip = peerInfo.peerAddress;
+						int port = Integer.parseInt(peerInfo.getPeerPort());
+						Thread thread = new Thread(new RemotePeerHandler(ip, port, 1,peerId));
+						listeners.add(thread);
+						thread.start();
 					}
 				}
 
-				// Spawns a listening thread
-				try
-				{
-					peerProcess.listeningSocket = new ServerSocket(peerProcess.LISTENING_PORT);
-					peerProcess.listeningThread = new Thread(new ListeningThread(peerProcess.listeningSocket, peerId));
-					peerProcess.listeningThread.start();
+				try {
+					peerProcess.socket = new ServerSocket(peerProcess.portNo);
+					peerProcess.server = new Thread(new ListeningThread(peerProcess.socket, peerId));
+					peerProcess.server.start();
 				}
-				catch(SocketTimeoutException tox)
+				catch(SocketTimeoutException e)
 				{
-					showLog(peerId + " gets time out exception in Starting the listening thread: " + tox.toString());
+					showLog(peerId + " gets time out exception in Starting the listening thread: " + e.toString());
 					LogGenerator.stop();
 					System.exit(0);
 				}
-				catch(IOException ex)
+				catch(IOException e)
 				{
-					showLog(peerId + " gets exception in Starting the listening thread: " + peerProcess.LISTENING_PORT + " "+ ex.toString());
+					showLog(peerId + " gets exception in Starting the listening thread: " + peerProcess.portNo + " "+ e.toString());
 					LogGenerator.stop();
 					System.exit(0);
 				}
 			}
 			
-			startPreferredNeighbors();
-			startUnChokedNeighbors();
+			timer = new Timer();
+			timer.schedule(new PreferredNeighbors(), Configurations.unchokingInterval * 1000 * 0, Configurations.unchokingInterval * 1000);
+
+			timer = new Timer();
+			timer.schedule(new UnChokedNeighbors(), Configurations.optimisticUnchokingInterval * 1000 * 0, Configurations.optimisticUnchokingInterval * 1000);
 			
 			while(true)
 			{
-				// checks for termination
-				isFinished = isFinished();
-				if (isFinished) {
-					showLog("All peers have completed downloading the file.");
+				completed = completed();
+				if (completed) {
+					showLog("DOWNLOAD COMPLETE!!.");
 
-					stopPreferredNeighbors();
-					stopUnChokedNeighbors();
-
+					timer.cancel();
+					timer.cancel();
 					try {
 						Thread.currentThread();
 						Thread.sleep(2000);
-					} catch (InterruptedException ex) {
-					}
+					} catch (InterruptedException e) {}
 
-					if (peerProcess.listeningThread.isAlive())
-						peerProcess.listeningThread.stop();
+					if (peerProcess.server.isAlive())
+						peerProcess.server.stop();
 
-					if (messageProcessor.isAlive())
-						messageProcessor.stop();
+					if (mainThread.isAlive())
+						mainThread.stop();
 
-					for (int i = 0; i < receivingThread.size(); i++)
-						if (receivingThread.get(i).isAlive())
-							receivingThread.get(i).stop();
+					for (int i = 0; i < listeners.size(); i++)
+						if (listeners.get(i).isAlive())
+							listeners.get(i).stop();
 
 					for (int i = 0; i < sendingThread.size(); i++)
 						if (sendingThread.get(i).isAlive())
@@ -515,57 +427,41 @@ public class peerProcess implements MessageConstants
 					try {
 						Thread.currentThread();
 						Thread.sleep(5000);
-					} catch (InterruptedException ex) {
+					} catch (InterruptedException e) {
 					}
 				}
 			}
 		}
-		catch(Exception ex)
+		catch(Exception e)
 		{
-			showLog(peerId + " Exception in ending : " + ex.getMessage() );
+			showLog(peerId + " Exception in ending : " + e.getMessage() );
 		}
 		finally
 		{
-			showLog(peerId + " Peer process is exiting..");
 			LogGenerator.stop();
 			System.exit(0);
 		}
 	}
 
-	private static void initializePrefferedNeighbours() 
-	{
-		//Enumeration<String> keys = peersMap.keys();
-		for (String key : peersMap.keySet())
-		{
-			//String key = (String)keys.nextElement();
-			if(!key.equals(peerId))
-			{
-				preferedNeighbors.put(key, peersMap.get(key));		
-			}
-		}
-	}
 
-	/**
-	 * Checks if all peer has down loaded the file
-	 */
-	public static synchronized boolean isFinished() {
+	
+	public static synchronized boolean completed() {
 
-		String line;
-		int hasFileCount = 1;
+		String str;
+		int remaining = 1;
 		
 		try {
-			BufferedReader in = new BufferedReader(new FileReader(
-					"PeerInfo.cfg"));
+			BufferedReader br = new BufferedReader(new FileReader("PeerInfo.cfg"));
 
-			while ((line = in.readLine()) != null) {
-				hasFileCount = hasFileCount
-						* Integer.parseInt(line.trim().split("\\s+")[3]);
+			while ((str = br.readLine()) != null) {
+				String completedbit = str.trim().split("\\s+")[3];
+				remaining = remaining * Integer.parseInt(completedbit);
 			}
-			if (hasFileCount == 0) {
-				in.close();
+			if (remaining == 0) {
+				br.close();
 				return false;
 			} else {
-				in.close();
+				br.close();
 				return true;
 			}
 
@@ -575,25 +471,5 @@ public class peerProcess implements MessageConstants
 		}
 
 	}
-	
-	public static void createEmptyFile() {
-		try {
-			File dir = new File(peerId);
-			dir.mkdir();
-
-			File newfile = new File(peerId, Configurations.fileName);
-			OutputStream os = new FileOutputStream(newfile, true);
-			byte b = 0;
-			
-			for (int i = 0; i < Configurations.fileSize; i++)
-				os.write(b);
-			os.close();
-		} 
-		catch (Exception e) {
-			showLog(peerId + " ERROR in creating the file : " + e.getMessage());
-		}
-
-	}
-	
 
 }
