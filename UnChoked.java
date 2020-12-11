@@ -90,8 +90,8 @@ public class UnChoked  extends TimerTask {
 			if (peerProcess.peersMap.get(p.peerId).isChoked == 1)
 			{
 				peerProcess.peersMap.get(p.peerId).isChoked = 0;
-				sendUnChoke(peerProcess.peerIDToSocketMap.get(p.peerId), p.peerId);
-				sendHave(peerProcess.peerIDToSocketMap.get(p.peerId), p.peerId);
+				sendUnChoke(peerProcess.socketMap.get(p.peerId), p.peerId);
+				sendHave(peerProcess.socketMap.get(p.peerId), p.peerId);
 				peerProcess.peersMap.get(p.peerId).state = 3;
 			}
 		}

@@ -94,7 +94,7 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 			remotePeerId = handshakeMessage.getPeerIDString();
 			
 			//populate peerID to socket mapping
-			peerProcess.peerIDToSocketMap.put(remotePeerId, this.peerSocket);
+			peerProcess.socketMap.put(remotePeerId, this.peerSocket);
 		} 
 		catch (IOException e) 
 		{
@@ -256,7 +256,7 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 						peerProcess.showLog(ownPeerId + " Received a HANDSHAKE message from Peer " + remotePeerId);
 						
 						//populate peerID to socket mapping
-						peerProcess.peerIDToSocketMap.put(remotePeerId, this.peerSocket);
+						peerProcess.socketMap.put(remotePeerId, this.peerSocket);
 						break;
 					}
 					else
@@ -286,7 +286,7 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 						peerProcess.showLog(ownPeerId + " Received a HANDSHAKE message from Peer " + remotePeerId);
 						
 						//populate peerID to socket mapping
-						peerProcess.peerIDToSocketMap.put(remotePeerId, this.peerSocket);
+						peerProcess.socketMap.put(remotePeerId, this.peerSocket);
 						break;
 					}
 					else
@@ -328,7 +328,7 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 						||dataMessage.getMessageTypeString().equals(MessageConstants.DATA_MSG_NOTINTERESTED)){
 					dataMsgWrapper.dataMsg = dataMessage;
 					dataMsgWrapper.fromPeerID = this.remotePeerId;
-					peerProcess.addToMsgQueue(dataMsgWrapper);
+					peerProcess.offer(dataMsgWrapper);
 				}
 				else {
 					int bytesAlreadyRead = 0;
@@ -348,7 +348,7 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 					DataMessage dataMsgWithPayload = DataMessage.decodeMessage(dataBuffWithPayload);
 					dataMsgWrapper.dataMsg = dataMsgWithPayload;
 					dataMsgWrapper.fromPeerID = remotePeerId;
-					peerProcess.addToMsgQueue(dataMsgWrapper);
+					peerProcess.offer(dataMsgWrapper);
 					dataBuffPayload = null;
 					dataBuffWithPayload = null;
 					bytesAlreadyRead = 0;

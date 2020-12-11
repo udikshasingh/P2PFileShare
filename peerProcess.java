@@ -8,7 +8,6 @@ public class peerProcess implements MessageConstants
 	
 	public ServerSocket socket = null;
 	public int portNo;
-	//public String PEER_IP = null;
 	public static String peerId;
 	public int serialNo;
 	public Thread server; 
@@ -18,12 +17,12 @@ public class peerProcess implements MessageConstants
 	public static volatile Timer timerUnChok;
 	
 	public static volatile Hashtable<String, RemotePeerInfo> unchokedNeighbors = new Hashtable<String, RemotePeerInfo>();
-	public static volatile Queue<DataMessageWrapper> messageQ = new LinkedList<DataMessageWrapper>();
-	public static Hashtable<String, Socket> peerIDToSocketMap = new Hashtable<String, Socket>();
+	public static  Queue<DataMessageWrapper> messageQ = new LinkedList<>();
+	public static Map<String, Socket> socketMap = new HashMap<>();
 	public static List<Thread> listeners = new ArrayList<Thread>();
-	public static Vector<Thread> sendingThread = new Vector<Thread>();
+	public static List<Thread> sendingThread = new ArrayList<Thread>();
 	public static Thread mainThread;
-	public static synchronized void addToMsgQueue(DataMessageWrapper msg)
+	public static synchronized void offer(DataMessageWrapper msg)
 	{
 		messageQ.add(msg);
 	}

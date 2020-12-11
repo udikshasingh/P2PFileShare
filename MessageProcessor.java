@@ -78,13 +78,13 @@ public class MessageProcessor implements Runnable, MessageConstants
 				if(isInterested(d, rPeerId))
 				{
 					//peerProcess.showLog(peerProcess.peerID + " is interested in Peer " + rPeerId);
-					sendInterested(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
+					sendInterested(peerProcess.socketMap.get(rPeerId), rPeerId);
 					peerProcess.peersMap.get(rPeerId).state = 9;
 				}	
 				else
 				{
 					//peerProcess.showLog(peerProcess.peerID + "is not interested " + rPeerId);
-					sendNotInterested(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
+					sendNotInterested(peerProcess.socketMap.get(rPeerId), rPeerId);
 					peerProcess.peersMap.get(rPeerId).state = 13;
 				}
 			}
@@ -96,7 +96,7 @@ public class MessageProcessor implements Runnable, MessageConstants
 			 case 2:
 			   if (msgType.equals(DATA_MSG_BITFIELD)) {
 		 		  peerProcess.showLog(peerProcess.peerId + " receieved a BITFIELD message from Peer " + rPeerId);
-	 			  sendBitField(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
+	 			  sendBitField(peerProcess.socketMap.get(rPeerId), rPeerId);
  				  peerProcess.peersMap.get(rPeerId).state = 3;  
 			   }
 			   break;
@@ -117,14 +117,14 @@ public class MessageProcessor implements Runnable, MessageConstants
 					
 					if(!peerProcess.prefMap.containsKey(rPeerId) && !peerProcess.unchokedNeighbors.containsKey(rPeerId))
 					{
-						sendChoke(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
+						sendChoke(peerProcess.socketMap.get(rPeerId), rPeerId);
 						peerProcess.peersMap.get(rPeerId).isChoked = 1;
 						peerProcess.peersMap.get(rPeerId).state  = 6;
 					}
 					else
 					{
 						peerProcess.peersMap.get(rPeerId).isChoked = 0;
-						sendUnChoke(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
+						sendUnChoke(peerProcess.socketMap.get(rPeerId), rPeerId);
 						peerProcess.peersMap.get(rPeerId).state = 4 ;
 					}
 			   }
@@ -133,11 +133,11 @@ public class MessageProcessor implements Runnable, MessageConstants
 			 case 4:
 				 if (msgType.equals(DATA_MSG_REQUEST)) {
 					//peerProcess.showLog(peerProcess.peerID + " receieved a REQUEST message from Peer " + rPeerId);
-						sendPeice(peerProcess.peerIDToSocketMap.get(rPeerId), d, rPeerId);
+						sendPeice(peerProcess.socketMap.get(rPeerId), d, rPeerId);
 						// Decide to send CHOKE or UNCHOKE message
 						if(!peerProcess.prefMap.containsKey(rPeerId) && !peerProcess.unchokedNeighbors.containsKey(rPeerId))
 						{
-							sendChoke(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
+							sendChoke(peerProcess.socketMap.get(rPeerId), rPeerId);
 							peerProcess.peersMap.get(rPeerId).isChoked = 1;
 							peerProcess.peersMap.get(rPeerId).state = 6;
 						}  
@@ -150,13 +150,13 @@ public class MessageProcessor implements Runnable, MessageConstants
 						if(isInterested(d,rPeerId))
 						{
 							//peerProcess.showLog(peerProcess.peerID + " is interested in Peer " + rPeerId);
-							sendInterested(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
+							sendInterested(peerProcess.socketMap.get(rPeerId), rPeerId);
 							peerProcess.peersMap.get(rPeerId).state = 9;
 						}	
 						else
 						{
 							//peerProcess.showLog(peerProcess.peerID + " is not interested in Peer " + rPeerId);
-							sendNotInterested(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
+							sendNotInterested(peerProcess.socketMap.get(rPeerId), rPeerId);
 							peerProcess.peersMap.get(rPeerId).state = 13;
 						}
 				 }
@@ -175,7 +175,7 @@ public class MessageProcessor implements Runnable, MessageConstants
 						if(firstdiff != -1)
 						{
 							//peerProcess.showLog(peerProcess.peerID + " is Requesting PIECE " + firstdiff + " from peer " + rPeerId);
-							sendRequest(peerProcess.peerIDToSocketMap.get(rPeerId), firstdiff, rPeerId);
+							sendRequest(peerProcess.socketMap.get(rPeerId), firstdiff, rPeerId);
 							peerProcess.peersMap.get(rPeerId).state = 11;
 							// Get the time when the request is being sent.
 							peerProcess.peersMap.get(rPeerId).startTime = new Date();
@@ -201,7 +201,7 @@ public class MessageProcessor implements Runnable, MessageConstants
 						if(toGetPeiceIndex != -1)
 						{
 							//peerProcess.showLog(peerProcess.peerID + " Requesting piece " + toGetPeiceIndex + " from peer " + rPeerId);
-							sendRequest(peerProcess.peerIDToSocketMap.get(rPeerId),toGetPeiceIndex, rPeerId);
+							sendRequest(peerProcess.socketMap.get(rPeerId),toGetPeiceIndex, rPeerId);
 							peerProcess.peersMap.get(rPeerId).state  = 11;
 							// Get the time when the request is being sent.
 							peerProcess.peersMap.get(rPeerId).startTime = new Date();
@@ -244,7 +244,7 @@ public class MessageProcessor implements Runnable, MessageConstants
 							if (pref.isCompleted == 0 && pref.isChoked == 0 && pref.isHandShaked == 1)
 							{
 								//peerProcess.showLog(peerProcess.peerID + " isCompleted =" + pref.isCompleted + " isInterested =" + pref.isInterested + " isChoked =" + pref.isChoked);
-								sendHave(peerProcess.peerIDToSocketMap.get(key), key);
+								sendHave(peerProcess.socketMap.get(key), key);
 								peerProcess.peersMap.get(key).state = 3;
 								
 							} 
@@ -268,13 +268,13 @@ public class MessageProcessor implements Runnable, MessageConstants
 						if(isInterested(d,rPeerId))
 						{
 							//peerProcess.showLog(peerProcess.peerID + " is interested in Peer " + rPeerId);
-							sendInterested(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
+							sendInterested(peerProcess.socketMap.get(rPeerId), rPeerId);
 							peerProcess.peersMap.get(rPeerId).state = 9;
 						}	
 						else
 						{
 							//peerProcess.showLog(peerProcess.peerID + " is not interested in Peer " + rPeerId);
-							sendNotInterested(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
+							sendNotInterested(peerProcess.socketMap.get(rPeerId), rPeerId);
 							peerProcess.peersMap.get(rPeerId).state = 13;
 						}
 				 }

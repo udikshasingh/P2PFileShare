@@ -103,9 +103,9 @@ public  class PreferredNeighbors extends TimerTask {
 						
 						if (peerProcess.peersMap.get(pv.get(i).peerId).isChoked == 1)
 						{
-							sendUnChoke(peerProcess.peerIDToSocketMap.get(pv.get(i).peerId), pv.get(i).peerId);
+							sendUnChoke(peerProcess.socketMap.get(pv.get(i).peerId), pv.get(i).peerId);
 							peerProcess.peersMap.get(pv.get(i).peerId).isChoked = 0;
-							sendHave(peerProcess.peerIDToSocketMap.get(pv.get(i).peerId), pv.get(i).peerId);
+							sendHave(peerProcess.socketMap.get(pv.get(i).peerId), pv.get(i).peerId);
 							peerProcess.peersMap.get(pv.get(i).peerId).state = 3;
 						}
 						
@@ -132,9 +132,9 @@ public  class PreferredNeighbors extends TimerTask {
 						}
 						if (pref.isChoked == 1)
 						{
-							sendUnChoke(peerProcess.peerIDToSocketMap.get(key), key);
+							sendUnChoke(peerProcess.socketMap.get(key), key);
 							peerProcess.peersMap.get(key).isChoked = 0;
-							sendHave(peerProcess.peerIDToSocketMap.get(key), key);
+							sendHave(peerProcess.socketMap.get(key), key);
 							peerProcess.peersMap.get(key).state = 3;
 						}
 						
