@@ -1,4 +1,6 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
@@ -40,7 +42,13 @@ public class MessageProcessor implements Runnable, MessageConstants
 				
 		while(running)
 		{
-			dataWrapper  = peerProcess.removeFromMsgQueue();
+			//dataWrapper  = peerProcess.removeFromMsgQueue();
+			DataMessageWrapper msg = null;
+			if(!peerProcess.messageQ.isEmpty())
+			{
+				msg = peerProcess.messageQ.remove();
+			}
+			dataWrapper = msg;
 			while(dataWrapper == null)
 			{
 				Thread.currentThread();
@@ -49,7 +57,13 @@ public class MessageProcessor implements Runnable, MessageConstants
 				} catch (InterruptedException e) {
 				   e.printStackTrace();
 				}
-				dataWrapper  = peerProcess.removeFromMsgQueue();
+				DataMessageWrapper msg2 = null;
+				if(!peerProcess.messageQ.isEmpty())
+				{
+					msg2 = peerProcess.messageQ.remove();
+				}
+				dataWrapper = msg2;
+				//dataWrapper  = peerProcess.removeFromMsgQueue();
 			}
 			
 			d = dataWrapper.getDataMsg();
@@ -196,7 +210,28 @@ public class MessageProcessor implements Runnable, MessageConstants
 							peerProcess.peersMap.get(rPeerId).state = 13;
 						
 						//updates remote peerInfo
-						peerProcess.readPeerInfoAgain();
+						//peerProcess.readPeerInfoAgain();
+						try 
+						{
+							String st;
+							BufferedReader in = new BufferedReader(new FileReader("PeerInfo.cfg"));
+							while ((st = in.readLine()) != null)
+							{
+								String[]args = st.trim().split("\\s+");
+								String peerID = args[0];
+								int isCompleted = Integer.parseInt(args[3]);
+								if(isCompleted == 1)
+								{
+									peerProcess.peersMap.get(peerID).isCompleted = 1;
+									peerProcess.peersMap.get(peerID).isInterested = 0;
+									peerProcess.peersMap.get(peerID).isChoked = 0;
+								}
+							}
+							in.close();
+						}
+						catch (Exception e) {
+							peerProcess.showLog(peerProcess.peerId + e.toString());
+						}
 						
 						//Enumeration<String> keys = peerProcess.peersMap.keys();
 						for (String key : peerProcess.peersMap.keySet())
