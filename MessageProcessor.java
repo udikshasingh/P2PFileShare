@@ -56,22 +56,22 @@ public class MessageProcessor implements Runnable, MessageConstants
 			
 			msgType = d.getMessageTypeString();
 			rPeerId = dataWrapper.getFromPeerID();
-			int state = peerProcess.remotePeerInfoHash.get(rPeerId).state;
+			int state = peerProcess.peersMap.get(rPeerId).state;
 			if(msgType.equals(DATA_MSG_HAVE) && state != 14)
 			{
 				// LOG 7: Receive Message from peer
-				peerProcess.showLog(peerProcess.peerID + " receieved HAVE message from Peer " + rPeerId); 
+				peerProcess.showLog(peerProcess.peerId + " receieved HAVE message from Peer " + rPeerId); 
 				if(isInterested(d, rPeerId))
 				{
 					//peerProcess.showLog(peerProcess.peerID + " is interested in Peer " + rPeerId);
 					sendInterested(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
-					peerProcess.remotePeerInfoHash.get(rPeerId).state = 9;
+					peerProcess.peersMap.get(rPeerId).state = 9;
 				}	
 				else
 				{
 					//peerProcess.showLog(peerProcess.peerID + "is not interested " + rPeerId);
 					sendNotInterested(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
-					peerProcess.remotePeerInfoHash.get(rPeerId).state = 13;
+					peerProcess.peersMap.get(rPeerId).state = 13;
 				}
 			}
 			else
@@ -81,37 +81,37 @@ public class MessageProcessor implements Runnable, MessageConstants
 			 
 			 case 2:
 			   if (msgType.equals(DATA_MSG_BITFIELD)) {
-		 		  peerProcess.showLog(peerProcess.peerID + " receieved a BITFIELD message from Peer " + rPeerId);
+		 		  peerProcess.showLog(peerProcess.peerId + " receieved a BITFIELD message from Peer " + rPeerId);
 	 			  sendBitField(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
- 				  peerProcess.remotePeerInfoHash.get(rPeerId).state = 3;  
+ 				  peerProcess.peersMap.get(rPeerId).state = 3;  
 			   }
 			   break;
 			 
 			 case 3:
 			   if (msgType.equals(DATA_MSG_NOTINTERESTED)) {
 				 // LOG 9:
-					peerProcess.showLog(peerProcess.peerID + " receieved a NOT INTERESTED message from Peer " + rPeerId);
-					peerProcess.remotePeerInfoHash.get(rPeerId).isInterested = 0;
-					peerProcess.remotePeerInfoHash.get(rPeerId).state = 5;
-					peerProcess.remotePeerInfoHash.get(rPeerId).isHandShaked = 1;
+					peerProcess.showLog(peerProcess.peerId + " receieved a NOT INTERESTED message from Peer " + rPeerId);
+					peerProcess.peersMap.get(rPeerId).isInterested = 0;
+					peerProcess.peersMap.get(rPeerId).state = 5;
+					peerProcess.peersMap.get(rPeerId).isHandShaked = 1;
 			   }
 			   else if (msgType.equals(DATA_MSG_INTERESTED)) {
 				// LOG 8:
-					peerProcess.showLog(peerProcess.peerID + " receieved an INTERESTED message from Peer " + rPeerId);
-					peerProcess.remotePeerInfoHash.get(rPeerId).isInterested = 1;
-					peerProcess.remotePeerInfoHash.get(rPeerId).isHandShaked = 1;
+					peerProcess.showLog(peerProcess.peerId + " receieved an INTERESTED message from Peer " + rPeerId);
+					peerProcess.peersMap.get(rPeerId).isInterested = 1;
+					peerProcess.peersMap.get(rPeerId).isHandShaked = 1;
 					
 					if(!peerProcess.preferedNeighbors.containsKey(rPeerId) && !peerProcess.unchokedNeighbors.containsKey(rPeerId))
 					{
 						sendChoke(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
-						peerProcess.remotePeerInfoHash.get(rPeerId).isChoked = 1;
-						peerProcess.remotePeerInfoHash.get(rPeerId).state  = 6;
+						peerProcess.peersMap.get(rPeerId).isChoked = 1;
+						peerProcess.peersMap.get(rPeerId).state  = 6;
 					}
 					else
 					{
-						peerProcess.remotePeerInfoHash.get(rPeerId).isChoked = 0;
+						peerProcess.peersMap.get(rPeerId).isChoked = 0;
 						sendUnChoke(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
-						peerProcess.remotePeerInfoHash.get(rPeerId).state = 4 ;
+						peerProcess.peersMap.get(rPeerId).state = 4 ;
 					}
 			   }
 			   break;
@@ -124,8 +124,8 @@ public class MessageProcessor implements Runnable, MessageConstants
 						if(!peerProcess.preferedNeighbors.containsKey(rPeerId) && !peerProcess.unchokedNeighbors.containsKey(rPeerId))
 						{
 							sendChoke(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
-							peerProcess.remotePeerInfoHash.get(rPeerId).isChoked = 1;
-							peerProcess.remotePeerInfoHash.get(rPeerId).state = 6;
+							peerProcess.peersMap.get(rPeerId).isChoked = 1;
+							peerProcess.peersMap.get(rPeerId).state = 6;
 						}  
 				 }
 				 break;
@@ -137,13 +137,13 @@ public class MessageProcessor implements Runnable, MessageConstants
 						{
 							//peerProcess.showLog(peerProcess.peerID + " is interested in Peer " + rPeerId);
 							sendInterested(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
-							peerProcess.remotePeerInfoHash.get(rPeerId).state = 9;
+							peerProcess.peersMap.get(rPeerId).state = 9;
 						}	
 						else
 						{
 							//peerProcess.showLog(peerProcess.peerID + " is not interested in Peer " + rPeerId);
 							sendNotInterested(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
-							peerProcess.remotePeerInfoHash.get(rPeerId).state = 13;
+							peerProcess.peersMap.get(rPeerId).state = 13;
 						}
 				 }
 				 break;
@@ -151,66 +151,66 @@ public class MessageProcessor implements Runnable, MessageConstants
 			 case 9:
 				 if (msgType.equals(DATA_MSG_CHOKE)) {
 					// LOG 6:
-						peerProcess.showLog(peerProcess.peerID + " is CHOKED by Peer " + rPeerId);
-						peerProcess.remotePeerInfoHash.get(rPeerId).state = 14;
+						peerProcess.showLog(peerProcess.peerId + " is CHOKED by Peer " + rPeerId);
+						peerProcess.peersMap.get(rPeerId).state = 14;
 				 }
 				 else if (msgType.equals(DATA_MSG_UNCHOKE)) {
 					// LOG 5:
-						peerProcess.showLog(peerProcess.peerID + " is UNCHOKED by Peer " + rPeerId);
-						int firstdiff = peerProcess.ownBitField.returnFirstDiff(peerProcess.remotePeerInfoHash.get(rPeerId).bitField);
+						peerProcess.showLog(peerProcess.peerId + " is UNCHOKED by Peer " + rPeerId);
+						int firstdiff = peerProcess.ownBitField.returnFirstDiff(peerProcess.peersMap.get(rPeerId).bitField);
 						if(firstdiff != -1)
 						{
 							//peerProcess.showLog(peerProcess.peerID + " is Requesting PIECE " + firstdiff + " from peer " + rPeerId);
 							sendRequest(peerProcess.peerIDToSocketMap.get(rPeerId), firstdiff, rPeerId);
-							peerProcess.remotePeerInfoHash.get(rPeerId).state = 11;
+							peerProcess.peersMap.get(rPeerId).state = 11;
 							// Get the time when the request is being sent.
-							peerProcess.remotePeerInfoHash.get(rPeerId).startTime = new Date();
+							peerProcess.peersMap.get(rPeerId).startTime = new Date();
 						}
 						else
-							peerProcess.remotePeerInfoHash.get(rPeerId).state = 13;
+							peerProcess.peersMap.get(rPeerId).state = 13;
 				 }
 				 break;
 				 
 			 case 11:
 				 if (msgType.equals(DATA_MSG_PIECE)) {
 					    byte[] buffer = d.getPayload();						
-						peerProcess.remotePeerInfoHash.get(rPeerId).finishTime = new Date();
-						long timeLapse = peerProcess.remotePeerInfoHash.get(rPeerId).finishTime.getTime() - 
-									peerProcess.remotePeerInfoHash.get(rPeerId).startTime.getTime() ;
+						peerProcess.peersMap.get(rPeerId).finishTime = new Date();
+						long timeLapse = peerProcess.peersMap.get(rPeerId).finishTime.getTime() - 
+									peerProcess.peersMap.get(rPeerId).startTime.getTime() ;
 						
-						peerProcess.remotePeerInfoHash.get(rPeerId).dataRate = ((double)(buffer.length + DATA_MSG_LEN + DATA_MSG_TYPE)/(double)timeLapse) * 100;
+						peerProcess.peersMap.get(rPeerId).dataRate = ((double)(buffer.length + DATA_MSG_LEN + DATA_MSG_TYPE)/(double)timeLapse) * 100;
 						
 						Piece p = Piece.decodePiece(buffer);
 						peerProcess.ownBitField.updateBitField(rPeerId, p);			
 						
-						int toGetPeiceIndex = peerProcess.ownBitField.returnFirstDiff(peerProcess.remotePeerInfoHash.get(rPeerId).bitField);
+						int toGetPeiceIndex = peerProcess.ownBitField.returnFirstDiff(peerProcess.peersMap.get(rPeerId).bitField);
 						if(toGetPeiceIndex != -1)
 						{
 							//peerProcess.showLog(peerProcess.peerID + " Requesting piece " + toGetPeiceIndex + " from peer " + rPeerId);
 							sendRequest(peerProcess.peerIDToSocketMap.get(rPeerId),toGetPeiceIndex, rPeerId);
-							peerProcess.remotePeerInfoHash.get(rPeerId).state  = 11;
+							peerProcess.peersMap.get(rPeerId).state  = 11;
 							// Get the time when the request is being sent.
-							peerProcess.remotePeerInfoHash.get(rPeerId).startTime = new Date();
+							peerProcess.peersMap.get(rPeerId).startTime = new Date();
 						}
 						else
-							peerProcess.remotePeerInfoHash.get(rPeerId).state = 13;
+							peerProcess.peersMap.get(rPeerId).state = 13;
 						
 						//updates remote peerInfo
 						peerProcess.readPeerInfoAgain();
 						
-						Enumeration<String> keys = peerProcess.remotePeerInfoHash.keys();
-						while(keys.hasMoreElements())
+						//Enumeration<String> keys = peerProcess.peersMap.keys();
+						for (String key : peerProcess.peersMap.keySet())
 						{
-							String key = (String)keys.nextElement();
-							RemotePeerInfo pref = peerProcess.remotePeerInfoHash.get(key);
+							//String key = (String)keys.nextElement();
+							RemotePeerInfo pref = peerProcess.peersMap.get(key);
 							
-							if(key.equals(peerProcess.peerID))continue;
+							if(key.equals(peerProcess.peerId))continue;
 							//peerProcess.showLog(peerProcess.peerID + ":::: isCompleted =" + pref.isCompleted + " isInterested =" + pref.isInterested + " isChoked =" + pref.isChoked);
 							if (pref.isCompleted == 0 && pref.isChoked == 0 && pref.isHandShaked == 1)
 							{
 								//peerProcess.showLog(peerProcess.peerID + " isCompleted =" + pref.isCompleted + " isInterested =" + pref.isInterested + " isChoked =" + pref.isChoked);
 								sendHave(peerProcess.peerIDToSocketMap.get(key), key);
-								peerProcess.remotePeerInfoHash.get(key).state = 3;
+								peerProcess.peersMap.get(key).state = 3;
 								
 							} 
 							
@@ -222,8 +222,8 @@ public class MessageProcessor implements Runnable, MessageConstants
 				 }
 				 else if (msgType.equals(DATA_MSG_CHOKE)) {
 					// LOG 6:
-						peerProcess.showLog(peerProcess.peerID + " is CHOKED by Peer " + rPeerId);
-						peerProcess.remotePeerInfoHash.get(rPeerId).state = 14;
+						peerProcess.showLog(peerProcess.peerId + " is CHOKED by Peer " + rPeerId);
+						peerProcess.peersMap.get(rPeerId).state = 14;
 				 }
 				 break;
 				 
@@ -234,19 +234,19 @@ public class MessageProcessor implements Runnable, MessageConstants
 						{
 							//peerProcess.showLog(peerProcess.peerID + " is interested in Peer " + rPeerId);
 							sendInterested(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
-							peerProcess.remotePeerInfoHash.get(rPeerId).state = 9;
+							peerProcess.peersMap.get(rPeerId).state = 9;
 						}	
 						else
 						{
 							//peerProcess.showLog(peerProcess.peerID + " is not interested in Peer " + rPeerId);
 							sendNotInterested(peerProcess.peerIDToSocketMap.get(rPeerId), rPeerId);
-							peerProcess.remotePeerInfoHash.get(rPeerId).state = 13;
+							peerProcess.peersMap.get(rPeerId).state = 13;
 						}
 				 }
 				 else if (msgType.equals(DATA_MSG_UNCHOKE)) {
                         // LOG 5:
-						peerProcess.showLog(peerProcess.peerID + " is UNCHOKED by Peer " + rPeerId);
-						peerProcess.remotePeerInfoHash.get(rPeerId).state = 14;
+						peerProcess.showLog(peerProcess.peerId + " is UNCHOKED by Peer " + rPeerId);
+						peerProcess.peersMap.get(rPeerId).state = 14;
 				 }
 				 break;
 				 
@@ -298,29 +298,29 @@ public class MessageProcessor implements Runnable, MessageConstants
 		byte[] bytePieceIndex = d.getPayload();
 		int pieceIndex = ConversionUtil.byteArrayToInt(bytePieceIndex);
 		
-		peerProcess.showLog(peerProcess.peerID + " sending a PIECE message for piece " + pieceIndex + " to Peer " + remotePeerID);
+		peerProcess.showLog(peerProcess.peerId + " sending a PIECE message for piece " + pieceIndex + " to Peer " + remotePeerID);
 		
-		byte[] byteRead = new byte[CommonProperties.pieceSize];
+		byte[] byteRead = new byte[Configurations.pieceSize];
 		int noBytesRead = 0;
 		
-		File file = new File(peerProcess.peerID,CommonProperties.fileName);
+		File file = new File(peerProcess.peerId,Configurations.fileName);
 		try 
 		{
 			raf = new RandomAccessFile(file,"r");
-			raf.seek(pieceIndex*CommonProperties.pieceSize);
-			noBytesRead = raf.read(byteRead, 0, CommonProperties.pieceSize);
+			raf.seek(pieceIndex*Configurations.pieceSize);
+			noBytesRead = raf.read(byteRead, 0, Configurations.pieceSize);
 		} 
 		catch (IOException e) 
 		{
-			peerProcess.showLog(peerProcess.peerID + " ERROR in reading the file : " +  e.toString());
+			peerProcess.showLog(peerProcess.peerId + " ERROR in reading the file : " +  e.toString());
 		}
 		if( noBytesRead == 0)
 		{
-			peerProcess.showLog(peerProcess.peerID + " ERROR :  Zero bytes read from the file !");
+			peerProcess.showLog(peerProcess.peerId + " ERROR :  Zero bytes read from the file !");
 		}
 		else if (noBytesRead < 0)
 		{
-			peerProcess.showLog(peerProcess.peerID + " ERROR : File could not be read properly.");
+			peerProcess.showLog(peerProcess.peerId + " ERROR : File could not be read properly.");
 		}
 		
 		byte[] buffer = new byte[noBytesRead + MessageConstants.PIECE_INDEX_LEN];
@@ -346,14 +346,14 @@ public class MessageProcessor implements Runnable, MessageConstants
 	
 	private void sendNotInterested(Socket socket, String remotePeerID) 
 	{
-		peerProcess.showLog(peerProcess.peerID + " sending a NOT INTERESTED message to Peer " + remotePeerID);
+		peerProcess.showLog(peerProcess.peerId + " sending a NOT INTERESTED message to Peer " + remotePeerID);
 		DataMessage d =  new DataMessage(DATA_MSG_NOTINTERESTED);
 		byte[] msgByte = DataMessage.encodeMessage(d);
 		SendData(socket,msgByte);
 	}
 
 	private void sendInterested(Socket socket, String remotePeerID) {
-		peerProcess.showLog(peerProcess.peerID + " sending an INTERESTED message to Peer " + remotePeerID);
+		peerProcess.showLog(peerProcess.peerId + " sending an INTERESTED message to Peer " + remotePeerID);
 		DataMessage d =  new DataMessage(DATA_MSG_INTERESTED);
 		byte[] msgByte = DataMessage.encodeMessage(d);
 		SendData(socket,msgByte);		
@@ -364,7 +364,7 @@ public class MessageProcessor implements Runnable, MessageConstants
 	private boolean isInterested(DataMessage d, String rPeerId) {		
 		
 		BitField b = BitField.decode(d.getPayload());
-		peerProcess.remotePeerInfoHash.get(rPeerId).bitField = b;
+		peerProcess.peersMap.get(rPeerId).bitField = b;
 
 		if(peerProcess.ownBitField.compare(b))return true;
 		return false;
@@ -372,14 +372,14 @@ public class MessageProcessor implements Runnable, MessageConstants
 
 	private void sendUnChoke(Socket socket, String remotePeerID) {
 
-		peerProcess.showLog(peerProcess.peerID + " sending UNCHOKE message to Peer " + remotePeerID);
+		peerProcess.showLog(peerProcess.peerId + " sending UNCHOKE message to Peer " + remotePeerID);
 		DataMessage d = new DataMessage(DATA_MSG_UNCHOKE);
 		byte[] msgByte = DataMessage.encodeMessage(d);
 		SendData(socket,msgByte);
 	}
 
 	private void sendChoke(Socket socket, String remotePeerID) {
-		peerProcess.showLog(peerProcess.peerID + " sending CHOKE message to Peer " + remotePeerID);
+		peerProcess.showLog(peerProcess.peerId + " sending CHOKE message to Peer " + remotePeerID);
 		DataMessage d = new DataMessage(DATA_MSG_CHOKE);
 		byte[] msgByte = DataMessage.encodeMessage(d);
 		SendData(socket,msgByte);
@@ -387,7 +387,7 @@ public class MessageProcessor implements Runnable, MessageConstants
 
 	private void sendBitField(Socket socket, String remotePeerID) {
 	
-		peerProcess.showLog(peerProcess.peerID + " sending BITFIELD message to Peer " + remotePeerID);
+		peerProcess.showLog(peerProcess.peerId + " sending BITFIELD message to Peer " + remotePeerID);
 		byte[] encodedBitField = peerProcess.ownBitField.encode();
 
 		DataMessage d = new DataMessage(DATA_MSG_BITFIELD, encodedBitField);
@@ -399,7 +399,7 @@ public class MessageProcessor implements Runnable, MessageConstants
 	
 	private void sendHave(Socket socket, String remotePeerID) {
 		
-		peerProcess.showLog(peerProcess.peerID + " sending HAVE message to Peer " + remotePeerID);
+		peerProcess.showLog(peerProcess.peerId + " sending HAVE message to Peer " + remotePeerID);
 		byte[] encodedBitField = peerProcess.ownBitField.encode();
 		DataMessage d = new DataMessage(DATA_MSG_HAVE, encodedBitField);
 		SendData(socket,DataMessage.encodeMessage(d));

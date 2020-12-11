@@ -20,7 +20,7 @@ public class Piece
 	}
 	public Piece()
 	{
-		filePiece = new byte[CommonProperties.pieceSize];
+		filePiece = new byte[Configurations.pieceSize];
 		pieceIndex = -1;
 		isPresent = 0;
 		fromPeerID = null;

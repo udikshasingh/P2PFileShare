@@ -13,7 +13,7 @@ public class BitField implements MessageConstants
 
 	public BitField() 
 	{
-		size = (int) Math.ceil(((double) CommonProperties.fileSize / (double) CommonProperties.pieceSize));
+		size = (int) Math.ceil(((double) Configurations.fileSize / (double) Configurations.pieceSize));
 		this.pieces = new Piece[size];
 
 		for (int i = 0; i < this.size; i++)
@@ -211,9 +211,9 @@ public class BitField implements MessageConstants
 			} 
 			else 
 			{
-				String fileName = CommonProperties.fileName;
-				File file = new File(peerProcess.peerID, fileName);
-				int off = piece.pieceIndex * CommonProperties.pieceSize;
+				String fileName = Configurations.fileName;
+				File file = new File(peerProcess.peerId, fileName);
+				int off = piece.pieceIndex * Configurations.pieceSize;
 				RandomAccessFile raf = new RandomAccessFile(file, "rw");
 				byte[] byteWrite;
 				byteWrite = piece.filePiece;
@@ -225,24 +225,24 @@ public class BitField implements MessageConstants
 				this.pieces[piece.pieceIndex].setFromPeerID(peerId);
 				raf.close();
 				
-				peerProcess.showLog(peerProcess.peerID
+				peerProcess.showLog(peerProcess.peerId
 						+ " has downloaded the PIECE " + piece.pieceIndex
 						+ " from Peer " + peerId
 						+ ". Now the number of pieces it has is "
 						+ peerProcess.ownBitField.ownPieces());
 
 				if (peerProcess.ownBitField.isCompleted()) {
-					peerProcess.remotePeerInfoHash.get(peerProcess.peerID).isInterested = 0;
-					peerProcess.remotePeerInfoHash.get(peerProcess.peerID).isCompleted = 1;
-					peerProcess.remotePeerInfoHash.get(peerProcess.peerID).isChoked = 0;
-					updatePeerInfo(peerProcess.peerID, 1);
+					peerProcess.peersMap.get(peerProcess.peerId).isInterested = 0;
+					peerProcess.peersMap.get(peerProcess.peerId).isCompleted = 1;
+					peerProcess.peersMap.get(peerProcess.peerId).isChoked = 0;
+					updatePeerInfo(peerProcess.peerId, 1);
 					
-					peerProcess.showLog(peerProcess.peerID + " has DOWNLOADED the complete file.");
+					peerProcess.showLog(peerProcess.peerId + " has DOWNLOADED the complete file.");
 				}
 			}
 
 		} catch (Exception e) {
-			peerProcess.showLog(peerProcess.peerID
+			peerProcess.showLog(peerProcess.peerId
 					+ " EROR in updating bitfield " + e.getMessage());
 		}
 
