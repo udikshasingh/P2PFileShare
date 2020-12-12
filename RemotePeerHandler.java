@@ -157,7 +157,7 @@ public class RemotePeerHandler implements Runnable
 		}
 				
 		DataMessage m = DataMessage.decodeMessage(receiveUnchokeByte);
-		if(m.getMessageTypeString().equals("1")){
+		if(m.typeOfMsg.equals("1")){
 			peerProcess.print(ownPeerId + "is unchoked by " + remotePeerId);
 			return true;
 		}
@@ -185,7 +185,7 @@ public class RemotePeerHandler implements Runnable
 			return false;
 		}
 		DataMessage m = DataMessage.decodeMessage(receiveChokeByte);
-		if(m.getMessageTypeString().equals("0"))
+		if(m.typeOfMsg.equals("0"))
 		{
 			// LOG 6:
 			peerProcess.print(ownPeerId + " is CHOKED by " + remotePeerId);
@@ -210,7 +210,7 @@ public class RemotePeerHandler implements Runnable
 		}
 				
 		DataMessage m = DataMessage.decodeMessage(receivePeice);
-		if(m.getMessageTypeString().equals("1"))
+		if(m.typeOfMsg.equals("1"))
 		{	
 			// LOG 5:
 			peerProcess.print(ownPeerId + " is UNCHOKED by " + remotePeerId);
@@ -320,12 +320,22 @@ public class RemotePeerHandler implements Runnable
 				System.arraycopy(dataBuffWithoutPayload, 0, msgLength, 0, 4);
 				System.arraycopy(dataBuffWithoutPayload, 4, msgType, 0, 1);
 				DataMessage dataMessage = new DataMessage();
-				dataMessage.setMessageLength(msgLength);
-				dataMessage.setMessageType(msgType);
-				if(dataMessage.getMessageTypeString().equals("0")
-						||dataMessage.getMessageTypeString().equals("1")
-						||dataMessage.getMessageTypeString().equals("2")
-						||dataMessage.getMessageTypeString().equals("3")){
+				//dataMessage.setMessageLength(msgLength);
+				Integer l = Conversion.byteArrayToInt(msgLength, 0);
+				dataMessage.size = l.toString();
+				dataMessage.bytearrl = msgLength;
+				dataMessage.sized = l;
+				//dataMessage.setMessageType(msgType);
+				try {
+					dataMessage.typeOfMsg = new String(msgType, "UTF8");
+					dataMessage.bytearrt = msgType;
+				} catch (UnsupportedEncodingException e) {
+					peerProcess.print(e.toString());
+				}
+				if(dataMessage.typeOfMsg.equals("0")
+						||dataMessage.typeOfMsg.equals("1")
+						||dataMessage.typeOfMsg.equals("2")
+						||dataMessage.typeOfMsg.equals("3")){
 					dataMsgWrapper.dataMsg = dataMessage;
 					dataMsgWrapper.fromPeerID = this.remotePeerId;
 					peerProcess.offer(dataMsgWrapper);
@@ -333,15 +343,15 @@ public class RemotePeerHandler implements Runnable
 				else {
 					int bytesAlreadyRead = 0;
 					int bytesRead;
-					byte []dataBuffPayload = new byte[dataMessage.getMessageLengthInt()-1];
-					while(bytesAlreadyRead < dataMessage.getMessageLengthInt()-1){
-						bytesRead = in.read(dataBuffPayload, bytesAlreadyRead, dataMessage.getMessageLengthInt()-1-bytesAlreadyRead);
+					byte []dataBuffPayload = new byte[dataMessage.sized-1];
+					while(bytesAlreadyRead < dataMessage.sized-1){
+						bytesRead = in.read(dataBuffPayload, bytesAlreadyRead, dataMessage.sized-1-bytesAlreadyRead);
 						if(bytesRead == -1)
 							return;
 						bytesAlreadyRead += bytesRead;
 					}
 					
-					byte []dataBuffWithPayload = new byte [dataMessage.getMessageLengthInt()+4];
+					byte []dataBuffWithPayload = new byte [dataMessage.sized+4];
 					System.arraycopy(dataBuffWithoutPayload, 0, dataBuffWithPayload, 0, 4 + 1);
 					System.arraycopy(dataBuffPayload, 0, dataBuffWithPayload, 4 + 1, dataBuffPayload.length);
 					

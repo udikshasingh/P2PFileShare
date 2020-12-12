@@ -1,10 +1,4 @@
 import java.io.*;
-//import java.io.BufferedWriter;
-//import java.io.File;
-//import java.io.FileReader;
-//import java.io.FileWriter;
-//import java.io.RandomAccessFile;
-
 
 public class Conversion 
 {
@@ -14,7 +8,6 @@ public class Conversion
 	public Conversion() {
 		len = (int) Math.ceil(((double) peerProcess.fileSize / (double) peerProcess.pieceSize));
 		this.arr = new Piece[len];
-
 		for (int i = 0; i < this.len; i++)
 			this.arr[i] = new Piece();
 

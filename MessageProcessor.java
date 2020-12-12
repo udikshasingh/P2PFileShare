@@ -68,7 +68,7 @@ public class MessageProcessor implements Runnable
 			
 			d = dataWrapper.getDataMsg();
 			
-			msgType = d.getMessageTypeString();
+			msgType = d.typeOfMsg;
 			rPeerId = dataWrapper.getFromPeerID();
 			int state = peerProcess.peersMap.get(rPeerId).state;
 			if(msgType.equals("4") && state != 14)
@@ -187,7 +187,7 @@ public class MessageProcessor implements Runnable
 				 
 			 case 11:
 				 if (msgType.equals("7")) {
-					    byte[] buffer = d.getPayload();						
+					    byte[] buffer = d.content;						
 						peerProcess.peersMap.get(rPeerId).finishTime = new Date();
 						long timeLapse = peerProcess.peersMap.get(rPeerId).finishTime.getTime() - 
 									peerProcess.peersMap.get(rPeerId).startTime.getTime() ;
@@ -330,7 +330,7 @@ public class MessageProcessor implements Runnable
 
 	private void sendPeice(Socket socket, DataMessage d, String remotePeerID)  //d == requestmessage
 	{
-		byte[] bytePieceIndex = d.getPayload();
+		byte[] bytePieceIndex = d.content;
 		int pieceIndex = Conversion.byteArrayToInt(bytePieceIndex, 0);
 		
 		peerProcess.print(peerProcess.peerId + " sending a PIECE message for piece " + pieceIndex + " to Peer " + remotePeerID);
@@ -397,7 +397,7 @@ public class MessageProcessor implements Runnable
 	
 	private boolean isInterested(DataMessage d, String rPeerId) {		
 		
-		Conversion b = Conversion.convert(d.getPayload());
+		Conversion b = Conversion.convert(d.content);
 		peerProcess.peersMap.get(rPeerId).bitField = b;
 
 		//if(peerProcess.bit.compare(b))  return true;

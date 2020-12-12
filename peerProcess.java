@@ -35,15 +35,11 @@ public class peerProcess
 	{
 		queue.add(msg);
 	}
-	
-	
 	public static void print(String message)
 	{
 		Logger.info(DateUtil.getTime() + ": Peer " + message);
 		System.out.println(DateUtil.getTime() + ": Peer " + message);
 	}
-	
-	
 	
 	@SuppressWarnings("deprecation")
 	public static void main(String[] args) 
