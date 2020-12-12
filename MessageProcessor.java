@@ -335,15 +335,15 @@ public class MessageProcessor implements Runnable
 		
 		peerProcess.print(peerProcess.peerId + " sending a PIECE message for piece " + pieceIndex + " to Peer " + remotePeerID);
 		
-		byte[] byteRead = new byte[Configurations.pieceSize];
+		byte[] byteRead = new byte[peerProcess.pieceSize];
 		int noBytesRead = 0;
 		
-		File file = new File(peerProcess.peerId,Configurations.fileName);
+		File file = new File(peerProcess.peerId,peerProcess.fileName);
 		try 
 		{
 			raf = new RandomAccessFile(file,"r");
-			raf.seek(pieceIndex*Configurations.pieceSize);
-			noBytesRead = raf.read(byteRead, 0, Configurations.pieceSize);
+			raf.seek(pieceIndex*peerProcess.pieceSize);
+			noBytesRead = raf.read(byteRead, 0, peerProcess.pieceSize);
 		} 
 		catch (IOException e) 
 		{
@@ -397,12 +397,29 @@ public class MessageProcessor implements Runnable
 	
 	private boolean isInterested(DataMessage d, String rPeerId) {		
 		
-		BitOperator b = BitOperator.decode(d.getPayload());
+		Conversion b = Conversion.convert(d.getPayload());
 		peerProcess.peersMap.get(rPeerId).bitField = b;
 
-		if(peerProcess.bit.compare(b))  return true;
+		//if(peerProcess.bit.compare(b))  return true;
 		
-		return false;
+		
+		int yourSize = b.len;
+		boolean flag = false;
+
+		for (int i = 0; i < yourSize; i++) 
+		{
+			if (b.arr[i].getIsPresent() == 1
+					&& peerProcess.bit.arr[i].getIsPresent() == 0) 
+			{
+				flag = true;
+			} else
+				continue;
+		}
+
+		//return false;
+		
+		
+		return flag;
 	}
 
 	private void sendUnChoke(Socket socket, String remotePeerID) {

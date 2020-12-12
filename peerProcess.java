@@ -12,7 +12,7 @@ public class peerProcess
 	public int serialNo;
 	public Thread server; 
 	public static boolean completed = false;
-	public static BitOperator bit = null;
+	public static Conversion bit = null;
 	public static Timer timer;
 	public static volatile Timer timerUnChok;
 	
@@ -22,6 +22,15 @@ public class peerProcess
 	public static List<Thread> listeners = new ArrayList<Thread>();
 	public static List<Thread> sendingThread = new ArrayList<Thread>();
 	public static Thread mainThread;
+	
+	public static int numberOfPreferredNeighbors;
+	public static int unchokingInterval;
+	public static int optimisticUnchokingInterval;
+	public static String fileName;
+	public static int fileSize;
+	public static int pieceSize;
+	
+	
 	public static synchronized void offer(DataMessageWrapper msg)
 	{
 		queue.add(msg);
@@ -53,25 +62,25 @@ public class peerProcess
 					String key = configs[0];
 					String value = configs[1];
 					if (key.equals("NumberOfPreferredNeighbors")) {
-						Configurations.numberOfPreferredNeighbors = Integer.parseInt(value);
+						numberOfPreferredNeighbors = Integer.parseInt(value);
 					} else if (key.equals("UnchokingInterval")) {
-						Configurations.unchokingInterval = Integer.parseInt(value);
+						unchokingInterval = Integer.parseInt(value);
 					} else if (key.equals("OptimisticUnchokingInterval")) {
-						Configurations.optimisticUnchokingInterval = Integer.parseInt(value);
+						optimisticUnchokingInterval = Integer.parseInt(value);
 					} else if (key.equals("FileName")) {
-						Configurations.fileName = value;
+						fileName = value;
 					} else if (key.equals("FileSize")) {
-						Configurations.fileSize = Integer.parseInt(value);
+						fileSize = Integer.parseInt(value);
 					} else if (key.equals("PieceSize")) {
-						Configurations.pieceSize = Integer.parseInt(value);
+						pieceSize = Integer.parseInt(value);
 					}
 				}
-				print(peerId + " has set Common Configurations: NumberOfPreferredNeighbors = " + Configurations.numberOfPreferredNeighbors
-						 + ", UnchokingInterval = " + Configurations.unchokingInterval
-						 + ", OptimisticUnchokingInterval = " + Configurations.optimisticUnchokingInterval
-						+	 ", FileName = " + Configurations.fileName
-						+ ", FileSize = " + Configurations.fileSize
-						+ ", PieceSize = " + Configurations.pieceSize);
+				print(peerId + " has set Common Configurations: NumberOfPreferredNeighbors = " + numberOfPreferredNeighbors
+						 + ", UnchokingInterval = " + unchokingInterval
+						 + ", OptimisticUnchokingInterval = " + optimisticUnchokingInterval
+						+	 ", FileName = " + fileName
+						+ ", FileSize = " + fileSize
+						+ ", PieceSize = " + pieceSize);
 				br.close();
 			} catch (Exception e) {
 				print(peerId + e.toString());
@@ -114,25 +123,25 @@ public class peerProcess
 				}
 			}
 			
-			bit = new BitOperator();
+			bit = new Conversion();
 			int flag = isPrimary?1:0;
 			if (flag != 1) 
 				{
 		
-					for (int i = 0; i < bit.size; i++) 
+					for (int i = 0; i < bit.len; i++) 
 					{
-						bit.pieces[i].setIsPresent(0);
-						bit.pieces[i].setFromPeerID(peerId);
+						bit.arr[i].setIsPresent(0);
+						bit.arr[i].setFromPeerID(peerId);
 					}
 		
 				} 
 				else 
 				{
 		
-					for (int i = 0; i < bit.size; i++) 
+					for (int i = 0; i < bit.len; i++) 
 					{
-						bit.pieces[i].setIsPresent(1);
-						bit.pieces[i].setFromPeerID(peerId);
+						bit.arr[i].setIsPresent(1);
+						bit.arr[i].setFromPeerID(peerId);
 					}
 		
 				}
@@ -165,10 +174,10 @@ public class peerProcess
 			{	
 				try {
 
-					File dataFile = new File(peerId, Configurations.fileName);
+					File dataFile = new File(peerId, fileName);
 					OutputStream outputstream = new FileOutputStream(dataFile, true);
 					byte data = 0;
-					int size = Configurations.fileSize;
+					int size = fileSize;
 					for (int i = 0; i < size; i++)
 						outputstream.write(data);
 						outputstream.close();
@@ -209,10 +218,10 @@ public class peerProcess
 			}
 			
 			timer = new Timer();
-			timer.schedule(new PreferredNeighbors(), Configurations.unchokingInterval * 1000 * 0, Configurations.unchokingInterval * 1000);
+			timer.schedule(new PreferredNeighbors(), unchokingInterval * 1000 * 0, unchokingInterval * 1000);
 
 			timer = new Timer();
-			timer.schedule(new UnChoked(), Configurations.optimisticUnchokingInterval * 1000 * 0, Configurations.optimisticUnchokingInterval * 1000);
+			timer.schedule(new UnChoked(), optimisticUnchokingInterval * 1000 * 0, optimisticUnchokingInterval * 1000);
 			
 			while(true)
 			{

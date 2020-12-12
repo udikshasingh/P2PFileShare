@@ -79,7 +79,7 @@ public  class PreferredNeighbors extends TimerTask {
 					}
 				}
 			}
-			if(countInterested > Configurations.numberOfPreferredNeighbors)
+			if(countInterested > peerProcess.numberOfPreferredNeighbors)
 			{
 				boolean flag = peerProcess.prefMap.isEmpty();
 				if(!flag)
@@ -89,7 +89,7 @@ public  class PreferredNeighbors extends TimerTask {
 				int count = 0;
 				for (int i = 0; i < pv.size(); i++) 
 				{
-					if (count > Configurations.numberOfPreferredNeighbors - 1)
+					if (count > peerProcess.numberOfPreferredNeighbors - 1)
 						break;
 					if(pv.get(i).isHandShaked == 1 && !pv.get(i).peerId.equals(peerProcess.peerId) 
 							&& peerProcess.peersMap.get(pv.get(i).peerId).isCompleted == 0)
