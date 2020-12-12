@@ -315,7 +315,7 @@ public class MessageProcessor implements Runnable
 			pieceByte[i] = 0;
 		}
 
-		byte[] pieceIndexByte = Converter.intToByteArray(pieceNo);
+		byte[] pieceIndexByte = Conversion.intToByteArray(pieceNo);
 		System.arraycopy(pieceIndexByte, 0, pieceByte, 0,
 						pieceIndexByte.length);
 		DataMessage d = new DataMessage("6", pieceByte);
@@ -331,7 +331,7 @@ public class MessageProcessor implements Runnable
 	private void sendPeice(Socket socket, DataMessage d, String remotePeerID)  //d == requestmessage
 	{
 		byte[] bytePieceIndex = d.getPayload();
-		int pieceIndex = Converter.byteArrayToInt(bytePieceIndex);
+		int pieceIndex = Conversion.byteArrayToInt(bytePieceIndex, 0);
 		
 		peerProcess.print(peerProcess.peerId + " sending a PIECE message for piece " + pieceIndex + " to Peer " + remotePeerID);
 		

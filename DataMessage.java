@@ -82,12 +82,12 @@ public class DataMessage
     public void setMessageLength(int messageLength) {
         this.dataLength = messageLength;
         this.messageLength = ((Integer)messageLength).toString();
-        this.len = Converter.intToByteArray(messageLength);
+        this.len = Conversion.intToByteArray(messageLength);
     }
 	
 	public void setMessageLength(byte[] len) {
 
-		Integer l = Converter.byteArrayToInt(len);
+		Integer l = Conversion.byteArrayToInt(len, 0);
 		this.messageLength = l.toString();
 		this.len = len;
 		this.dataLength = l;  
@@ -236,7 +236,7 @@ public class DataMessage
 			msg.setMessageLength(msgLength);
 			msg.setMessageType(msgType);
 			
-			len = Converter.byteArrayToInt(msgLength);
+			len = Conversion.byteArrayToInt(msgLength, 0);
 			
 			if (len > 1) 
 			{

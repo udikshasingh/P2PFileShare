@@ -108,7 +108,7 @@ public class RemotePeerHandler implements Runnable
 	{
 		try 
 		{
-			out.write(DataMessage.encodeMessage(new DataMessage( "6", Converter.intToByteArray(index))));
+			out.write(DataMessage.encodeMessage(new DataMessage( "6", Conversion.intToByteArray(index))));
 		} 
 		catch (IOException e) 
 		{

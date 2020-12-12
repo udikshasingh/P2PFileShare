@@ -35,7 +35,7 @@ public class Piece
 		byte[] byteIndex = new byte[4];
 		Piece piece = new Piece();
 		System.arraycopy(payload, 0, byteIndex, 0, 4);
-		piece.pieceIndex = Converter.byteArrayToInt(byteIndex);
+		piece.pieceIndex = Conversion.byteArrayToInt(byteIndex, 0);
 		piece.filePiece = new byte[payload.length-4];
 		System.arraycopy(payload, 4, piece.filePiece, 0, payload.length-4);
 		return piece;

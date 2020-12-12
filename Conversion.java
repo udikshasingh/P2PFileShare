@@ -19,7 +19,27 @@ public class Conversion
 			this.arr[i] = new Piece();
 
 	}
+	public static byte[] intToByteArray(int val)
+	{
+        byte[] b = new byte[4];
+        for (int i = 0; i < 4; i++) 
+        {
+            int offset = (b.length - 1 - i) * 8;
+            b[i] = (byte) ((val >>> offset) & 0xFF);
+        }
+        return b;
+	}
 	
+	public static int byteArrayToInt(byte[] byt, int offset)
+    {
+        int val = 0;
+        for (int i = 0; i < 4; i++)
+        {
+            int shift = (4 - 1 - i) * 8;
+            val += (byt[i + offset] & 0x000000FF) << shift;
+        }
+        return val;
+    }
 
 	public static Conversion convert(byte[] bytearr) {
 		Conversion byteobj = new Conversion();
