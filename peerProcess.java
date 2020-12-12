@@ -12,7 +12,7 @@ public class peerProcess implements MessageConstants
 	public int serialNo;
 	public Thread server; 
 	public static boolean completed = false;
-	public static BitField bit = null;
+	public static BitOperator bit = null;
 	public static Timer timer;
 	public static volatile Timer timerUnChok;
 	
@@ -114,7 +114,7 @@ public class peerProcess implements MessageConstants
 				}
 			}
 			
-			bit = new BitField();
+			bit = new BitOperator();
 			int flag = isPrimary?1:0;
 			bit.initOwnBitfield(peerId, flag);
 			

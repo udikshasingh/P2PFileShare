@@ -398,7 +398,7 @@ public class MessageProcessor implements Runnable, MessageConstants
 //  Compare the bitfield and send TRUE if there is any extra data	
 	private boolean isInterested(DataMessage d, String rPeerId) {		
 		
-		BitField b = BitField.decode(d.getPayload());
+		BitOperator b = BitOperator.decode(d.getPayload());
 		peerProcess.peersMap.get(rPeerId).bitField = b;
 
 		if(peerProcess.bit.compare(b))return true;

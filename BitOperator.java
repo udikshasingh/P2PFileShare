@@ -6,12 +6,12 @@ import java.io.FileWriter;
 import java.io.RandomAccessFile;
 
 
-public class BitField implements MessageConstants 
+public class BitOperator implements MessageConstants 
 {
 	public Piece[] pieces;
 	public int size;
 
-	public BitField() 
+	public BitOperator() 
 	{
 		size = (int) Math.ceil(((double) Configurations.fileSize / (double) Configurations.pieceSize));
 		this.pieces = new Piece[size];
@@ -21,22 +21,24 @@ public class BitField implements MessageConstants
 
 	}
 	
-	public int getSize() {
-		return size;
-	}
-
-
-	public void setSize(int size) {
+	public void setSize(int size) 
+	{
 		this.size = size;
 	}
 
+	public int getSize() 
+	{
+		return size;
+	}
 	
-	public Piece[] getPieces() {
-		return pieces;
+	public void setPieces(Piece[] pieces) 
+	{
+		this.pieces = pieces;
 	}
 
-	public void setPieces(Piece[] pieces) {
-		this.pieces = pieces;
+	public Piece[] getPieces() 
+	{
+		return pieces;
 	}
 	
 	public byte[] encode()
@@ -44,23 +46,23 @@ public class BitField implements MessageConstants
 		return this.getBytes();
 	}
 	
-	public static BitField decode(byte[] b)
+	public static BitOperator decode(byte[] b)
 	{
-		BitField returnBitField = new BitField();
+		BitOperator returnBitField = new BitOperator();
 		for(int i = 0 ; i < b.length; i ++)
 		{
-			int count = 7;
-			while(count >=0)
+			int cnt = 7;
+			while(cnt >=0)
 			{
-				int test = 1 << count;
-				if(i * 8 + (8-count-1) < returnBitField.size)
+				int tst = 1 << cnt;
+				if(i * 8 + (8-cnt-1) < returnBitField.size)
 				{
-					if((b[i] & (test)) != 0)
-						returnBitField.pieces[i * 8 + (8-count-1)].isPresent = 1;
+					if((b[i] & (tst)) != 0)
+						returnBitField.pieces[i * 8 + (8-cnt-1)].isPresent = 1;
 					else
-						returnBitField.pieces[i * 8 + (8-count-1)].isPresent = 0;
+						returnBitField.pieces[i * 8 + (8-cnt-1)].isPresent = 0;
 				}
-				count--;
+				cnt--;
 			}
 		}
 		
@@ -68,13 +70,16 @@ public class BitField implements MessageConstants
 	}
 	
 	
-	public synchronized boolean compare(BitField yourBitField) {
+	public synchronized boolean compare(BitOperator yourBitField) 
+	{
 		int yourSize = yourBitField.getSize();
 		
 
-		for (int i = 0; i < yourSize; i++) {
+		for (int i = 0; i < yourSize; i++) 
+		{
 			if (yourBitField.getPieces()[i].getIsPresent() == 1
-					&& this.getPieces()[i].getIsPresent() == 0) {
+					&& this.getPieces()[i].getIsPresent() == 0) 
+			{
 				return true;
 			} else
 				continue;
@@ -83,23 +88,29 @@ public class BitField implements MessageConstants
 		return false;
 	}
 
-	// find first bit number i don't have but you have
-	public synchronized int returnFirstDiff(BitField yourBitField) 
+	public synchronized int returnFirstDiff(BitOperator yourBitField) 
 	{
 		int mySize = this.getSize();
 		int yourSize = yourBitField.getSize();
 
-		if (mySize >= yourSize) {
-			for (int i = 0; i < yourSize; i++) {
+		if (mySize >= yourSize) 
+		{
+			for (int i = 0; i < yourSize; i++) 
+			{
 				if (yourBitField.getPieces()[i].getIsPresent() == 1
-						&& this.getPieces()[i].getIsPresent() == 0) {
+						&& this.getPieces()[i].getIsPresent() == 0) 
+				{
 					return i;
 				}
 			}
-		} else {
-			for (int i = 0; i < mySize; i++) {
+		} 
+		else 
+		{
+			for (int i = 0; i < mySize; i++) 
+			{
 				if (yourBitField.getPieces()[i].getIsPresent() == 1
-						&& this.getPieces()[i].getIsPresent() == 0) {
+						&& this.getPieces()[i].getIsPresent() == 0) 
+				{
 					return i;
 				}
 			}
@@ -114,31 +125,32 @@ public class BitField implements MessageConstants
 		if (size % 8 != 0)
 			s = s + 1;
 		byte[] iP = new byte[s];
-		int tempInt = 0;
-		int count = 0;
+		int tempI = 0;
+		int cnt = 0;
 		int Cnt;
 		for (Cnt = 1; Cnt <= this.size; Cnt++)
 		{
 			int tempP = this.pieces[Cnt-1].isPresent;
-			tempInt = tempInt << 1;
+			tempI = tempI << 1;
 			if (tempP == 1) 
 			{
-				tempInt = tempInt + 1;
+				tempI = tempI + 1;
 			} else
-				tempInt = tempInt + 0;
+				tempI = tempI + 0;
 
-			if (Cnt % 8 == 0 && Cnt!=0) {
-				iP[count] = (byte) tempInt;
-				count++;
-				tempInt = 0;
+			if (Cnt % 8 == 0 && Cnt!=0) 
+			{
+				iP[cnt] = (byte) tempI;
+				cnt++;
+				tempI = 0;
 			}
 			
 		}
 		if ((Cnt-1) % 8 != 0) 
 		{
 			int tempShift = ((size) - (size / 8) * 8);
-			tempInt = tempInt << (8 - tempShift);
-			iP[count] = (byte) tempInt;
+			tempI = tempI << (8 - tempShift);
+			iP[cnt] = (byte) tempI;
 		}
 		return iP;
 	}
@@ -173,26 +185,32 @@ public class BitField implements MessageConstants
 	        i++;
 	    }
 
-	    String rslt = new String(out);
+	    String result = new String(out);
 
-	    return rslt;
+	    return result;
 	}
     
 	
-	public void initOwnBitfield(String OwnPeerId, int hasFile) {
+	public void initOwnBitfield(String OwnPeerId, int hasFile) 
+	{
 
-		if (hasFile != 1) {
+		if (hasFile != 1) 
+		{
 
 			// If the file not exists
-			for (int i = 0; i < this.size; i++) {
+			for (int i = 0; i < this.size; i++) 
+			{
 				this.pieces[i].setIsPresent(0);
 				this.pieces[i].setFromPeerID(OwnPeerId);
 			}
 
-		} else {
+		} 
+		else 
+		{
 
 			// If the file exists
-			for (int i = 0; i < this.size; i++) {
+			for (int i = 0; i < this.size; i++) 
+			{
 				this.pieces[i].setIsPresent(1);
 				this.pieces[i].setFromPeerID(OwnPeerId);
 			}
@@ -203,11 +221,13 @@ public class BitField implements MessageConstants
 
 	// Update the bit field class and piece information
 	 
-	public synchronized void updateBitField(String peerId, Piece piece) {
+	public synchronized void updateBitField(String peerId, Piece piece) 
+	{
 		try 
 		{
-			if (peerProcess.bit.pieces[piece.pieceIndex].isPresent == 1) {
-				peerProcess.showLog(peerId + " Piece already received!!");
+			if (peerProcess.bit.pieces[piece.pieceIndex].isPresent == 1) 
+			{
+				peerProcess.showLog(peerId + " Piece already received..!");
 			} 
 			else 
 			{
@@ -241,7 +261,9 @@ public class BitField implements MessageConstants
 				}
 			}
 
-		} catch (Exception e) {
+		} 
+		catch (Exception e) 
+		{
 			peerProcess.showLog(peerProcess.peerId
 					+ " EROR in updating bitfield " + e.getMessage());
 		}
@@ -249,18 +271,21 @@ public class BitField implements MessageConstants
 	}
     public int ownPieces()
     {
-        int count = 0;
+        int cnt = 0;
         for (int i = 0; i < this.size; i++)
             if (this.pieces[i].isPresent == 1)
-                count++;
+                cnt++;
         
-        return count;
+        return cnt;
     }
     
-    public boolean isCompleted() {
+	public boolean isCompleted() 
+	{
         
-        for (int i = 0; i < this.size; i++) {
-            if (this.pieces[i].isPresent == 0) {
+		for (int i = 0; i < this.size; i++) 
+		{
+			if (this.pieces[i].isPresent == 0) 
+			{
                 return false;
             }
         }
@@ -272,17 +297,17 @@ public class BitField implements MessageConstants
 	// Updates PeerInfo.cfg
 	public void updatePeerInfo(String clientID, int hasFile)
 	{
+		BufferedReader inp = null;
 		BufferedWriter out = null;
-		BufferedReader in = null;
 		
 		try 
 		{
-			in= new BufferedReader(new FileReader("PeerInfo.cfg"));
+			inp = new BufferedReader(new FileReader("PeerInfo.cfg"));
 		
 			String line;
 			StringBuffer buffer = new StringBuffer();
 		
-			while((line = in.readLine()) != null) 
+			while((line = inp.readLine()) != null) 
 			{
 				if(line.trim().split("\\s+")[0].equals(clientID))
 				{
@@ -296,7 +321,7 @@ public class BitField implements MessageConstants
 				buffer.append("\n");
 			}
 			
-			in.close();
+			inp.close();
 		
 			out= new BufferedWriter(new FileWriter("PeerInfo.cfg"));
 			out.write(buffer.toString());	

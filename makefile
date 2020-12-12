@@ -5,7 +5,7 @@ JFLAGS = -g
 	$(JC) $(JFLAGS) $*.java
 
 CLASSES = \
-	BitField.java \
+	BitOperator.java \
 	Configurations.java \
 	Converter.java \
 	DataMessage.java \
