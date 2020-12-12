@@ -32,6 +32,8 @@ public class peerProcess
 	public static int fileSize;
 	public static int pieceSize;
 	
+	static FileOutputStream fos;
+	static OutputStreamWriter outputstream;
 	
 	public static synchronized void offer(Source msg)
 	{
@@ -45,7 +47,10 @@ public class peerProcess
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		//return sdf.format(cal.getTime());
 		String timestamp = (sdf.format(cal.getTime()));
-		Logger.info(timestamp + ": Peer " + message);
+		//Logger.info(timestamp + ": Peer " + message);
+		try {
+			outputstream.write(timestamp + ": Peer " + message + '\n');
+		} catch (IOException e) {}
 		System.out.println(timestamp + ": Peer " + message);
 	}
 	
@@ -56,7 +61,9 @@ public class peerProcess
 		peerId = args[0];
 		try
 		{
-			Logger.setup("log_peer_" + peerId +".log");
+			//Logger.setup("log_peer_" + peerId +".log");
+			fos = new FileOutputStream("log_peer_" + peerId +".log");
+			outputstream = new OutputStreamWriter(fos, "UTF-8");
 			print(peerId + " has now started");
 			try {
 				BufferedReader br = new BufferedReader(new FileReader("Common.cfg"));
@@ -158,19 +165,27 @@ public class peerProcess
 				try
 				{
 					peerProcess.socket = new ServerSocket(peerProcess.portNo);
-					peerProcess.server = new Thread(new ListeningThread(peerProcess.socket, peerId));
+					peerProcess.server = new Thread(new Server(peerProcess.socket, peerId));
 					peerProcess.server.start();
 				}
 				catch(SocketTimeoutException e)
 				{
 					print(peerId + e.toString());
-					Logger.stop();
+					//Logger.stop();
+					try {
+						outputstream.flush();
+						fos.close();
+					} catch (Exception ex) {}
 					System.exit(0);
 				}
 				catch(IOException e)
 				{
 					print(peerId + e.toString());
-					Logger.stop();
+					//Logger.stop();
+					try {
+						outputstream.flush();
+						fos.close();
+					} catch (Exception ex) {}
 					System.exit(0);
 				}
 			}
@@ -204,19 +219,27 @@ public class peerProcess
 
 				try {
 					peerProcess.socket = new ServerSocket(peerProcess.portNo);
-					peerProcess.server = new Thread(new ListeningThread(peerProcess.socket, peerId));
+					peerProcess.server = new Thread(new Server(peerProcess.socket, peerId));
 					peerProcess.server.start();
 				}
 				catch(SocketTimeoutException e)
 				{
 					print(peerId + " gets time out exception in Starting the listening thread: " + e.toString());
-					Logger.stop();
+					//Logger.stop();
+					try {
+						outputstream.flush();
+						fos.close();
+					} catch (Exception ex) {}
 					System.exit(0);
 				}
 				catch(IOException e)
 				{
 					print(peerId + " gets exception in Starting the listening thread: " + peerProcess.portNo + " "+ e.toString());
-					Logger.stop();
+					//Logger.stop();
+					try {
+						outputstream.flush();
+						fos.close();
+					} catch (Exception ex) {}
 					System.exit(0);
 				}
 			}
@@ -270,7 +293,11 @@ public class peerProcess
 		}
 		finally
 		{
-			Logger.stop();
+			//Logger.stop();
+			try {
+				outputstream.flush();
+				fos.close();
+			} catch (Exception e) {}
 			System.exit(0);
 		}
 	}

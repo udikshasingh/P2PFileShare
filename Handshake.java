@@ -1,7 +1,7 @@
 import java.io.*;
 
 
-public class HandshakeMessage  
+public class Handshake  
 {
 	 public byte[] bytearray = new byte[18];
 	 public byte[] bytearray_id = new byte[4];
@@ -9,9 +9,9 @@ public class HandshakeMessage
 	 public String header;
 	 public String peerId;
 
-	public HandshakeMessage(){}
+	public Handshake(){}
 	
-	public HandshakeMessage(String str, String pid) {
+	public Handshake(String str, String pid) {
 		try {
 			this.header = str;
 			this.bytearray = str.getBytes("UTF8");
@@ -27,12 +27,12 @@ public class HandshakeMessage
 
 	}
 
-	public static HandshakeMessage convertToMessage(byte[] bytearr) {
-		HandshakeMessage hsmsg = null;
+	public static Handshake convertToMessage(byte[] bytearr) {
+		Handshake hsmsg = null;
 		try {
 			if (bytearr.length != 32)
 				throw new Exception("Byte array length not matching.");
-			hsmsg = new HandshakeMessage();
+			hsmsg = new Handshake();
 			byte[] arr1 = new byte[18];
 			byte[] arr2 = new byte[4];
 			System.arraycopy(bytearr, 0, arr1, 0, 18);
@@ -52,7 +52,7 @@ public class HandshakeMessage
 		return hsmsg;
 	}
 
-	public static byte[] convertToByteArray(HandshakeMessage handshakeMessage) {
+	public static byte[] convertToByteArray(Handshake handshakeMessage) {
 		byte[] bytearr = new byte[32];
 		try {
 			System.arraycopy(handshakeMessage.bytearray, 0, bytearr, 0, handshakeMessage.bytearray.length);

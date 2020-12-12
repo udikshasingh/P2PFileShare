@@ -7,10 +7,9 @@ JFLAGS = -g
 CLASSES = \
 	Conversion.java \
 	Data.java \
-	DataMessageWrapper.java \
-	HandshakeMessage.java \
-	ListeningThread.java \
-	Logger.java \
+	Source.java \
+	Handshake.java \
+	Server.java \
 	MessageProcessor.java \
 	PeerDataRateComparator.java \
 	peerProcess.java \
