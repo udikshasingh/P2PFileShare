@@ -10,15 +10,15 @@ import java.util.TimerTask;
 
 public  class PreferredNeighbors extends TimerTask {
 	private static void sendUnChoke(Socket socket, String remotePeerID) {
-		peerProcess.showLog(peerProcess.peerId + " is sending UNCHOKE message to remote Peer " + remotePeerID);
-		DataMessage d = new DataMessage(peerProcess.DATA_MSG_UNCHOKE);
+		peerProcess.print(peerProcess.peerId + " is sending UNCHOKE message to remote Peer " + remotePeerID);
+		DataMessage d = new DataMessage("1");
 		byte[] msgByte = DataMessage.encodeMessage(d);
 		SendData(socket, msgByte);
 	}
 	private static void sendHave(Socket socket, String remotePeerID) {
-		byte[] encodedBitField = peerProcess.bit.encode();
-		peerProcess.showLog(peerProcess.peerId + " sending HAVE message to Peer " + remotePeerID);
-		DataMessage d = new DataMessage(peerProcess.DATA_MSG_HAVE, encodedBitField);
+		byte[] encodedBitField = peerProcess.bit.getBytes();
+		peerProcess.print(peerProcess.peerId + " sending HAVE message to Peer " + remotePeerID);
+		DataMessage d = new DataMessage("5", encodedBitField);
 		SendData(socket,DataMessage.encodeMessage(d));
 		encodedBitField = null;
 	}
@@ -55,7 +55,7 @@ public  class PreferredNeighbors extends TimerTask {
 				in.close();
 			}
 			catch (Exception e) {
-				peerProcess.showLog(peerProcess.peerId + e.toString());
+				peerProcess.print(peerProcess.peerId + e.toString());
 			}
 			//Enumeration<String> keys = peersMap.keys();
 			int countInterested = 0;
@@ -144,7 +144,7 @@ public  class PreferredNeighbors extends TimerTask {
 			}
 			// LOG 3: Preferred Neighbors 
 			if (strPref != "")
-				peerProcess.showLog(peerProcess.peerId + " has selected the preferred neighbors - " + strPref);
+				peerProcess.print(peerProcess.peerId + " has selected the preferred neighbors - " + strPref);
 		}
 		
 	}

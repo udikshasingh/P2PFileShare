@@ -32,12 +32,12 @@ public class Piece
 	 */
 	public static Piece decodePiece(byte []payload)
 	{
-		byte[] byteIndex = new byte[MessageConstants.PIECE_INDEX_LEN];
+		byte[] byteIndex = new byte[4];
 		Piece piece = new Piece();
-		System.arraycopy(payload, 0, byteIndex, 0, MessageConstants.PIECE_INDEX_LEN);
+		System.arraycopy(payload, 0, byteIndex, 0, 4);
 		piece.pieceIndex = Converter.byteArrayToInt(byteIndex);
-		piece.filePiece = new byte[payload.length-MessageConstants.PIECE_INDEX_LEN];
-		System.arraycopy(payload, MessageConstants.PIECE_INDEX_LEN, piece.filePiece, 0, payload.length-MessageConstants.PIECE_INDEX_LEN);
+		piece.filePiece = new byte[payload.length-4];
+		System.arraycopy(payload, 4, piece.filePiece, 0, payload.length-4);
 		return piece;
 	}
 }

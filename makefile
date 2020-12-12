@@ -13,8 +13,7 @@ CLASSES = \
 	DateUtil.java \
 	HandshakeMessage.java \
 	ListeningThread.java \
-	LogGenerator.java \
-	MessageConstants.java \
+	Logger.java \
 	MessageProcessor.java \
 	PeerDataRateComparator.java \
 	peerProcess.java \

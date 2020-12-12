@@ -1,7 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
-public class peerProcess implements MessageConstants
+public class peerProcess 
 {
 	public static Map<String, RemotePeerInfo> peersMap = new HashMap<>();
 	public static Map<String, RemotePeerInfo> prefMap = new HashMap<>();
@@ -17,20 +17,20 @@ public class peerProcess implements MessageConstants
 	public static volatile Timer timerUnChok;
 	
 	public static volatile Hashtable<String, RemotePeerInfo> unchokedNeighbors = new Hashtable<String, RemotePeerInfo>();
-	public static  Queue<DataMessageWrapper> messageQ = new LinkedList<>();
+	public static  Queue<DataMessageWrapper> queue = new LinkedList<>();
 	public static Map<String, Socket> socketMap = new HashMap<>();
 	public static List<Thread> listeners = new ArrayList<Thread>();
 	public static List<Thread> sendingThread = new ArrayList<Thread>();
 	public static Thread mainThread;
 	public static synchronized void offer(DataMessageWrapper msg)
 	{
-		messageQ.add(msg);
+		queue.add(msg);
 	}
 	
 	
-	public static void showLog(String message)
+	public static void print(String message)
 	{
-		LogGenerator.writeLog(DateUtil.getTime() + ": Peer " + message);
+		Logger.info(DateUtil.getTime() + ": Peer " + message);
 		System.out.println(DateUtil.getTime() + ": Peer " + message);
 	}
 	
@@ -43,8 +43,8 @@ public class peerProcess implements MessageConstants
 		peerId = args[0];
 		try
 		{
-			LogGenerator.start("log_peer_" + peerId +".log");
-			showLog(peerId + " has now started");
+			Logger.setup("log_peer_" + peerId +".log");
+			print(peerId + " has now started");
 			try {
 				BufferedReader br = new BufferedReader(new FileReader("Common.cfg"));
 				String str;
@@ -66,7 +66,7 @@ public class peerProcess implements MessageConstants
 						Configurations.pieceSize = Integer.parseInt(value);
 					}
 				}
-				showLog(peerId + " has set Common Configurations: NumberOfPreferredNeighbors = " + Configurations.numberOfPreferredNeighbors
+				print(peerId + " has set Common Configurations: NumberOfPreferredNeighbors = " + Configurations.numberOfPreferredNeighbors
 						 + ", UnchokingInterval = " + Configurations.unchokingInterval
 						 + ", OptimisticUnchokingInterval = " + Configurations.optimisticUnchokingInterval
 						+	 ", FileName = " + Configurations.fileName
@@ -74,7 +74,7 @@ public class peerProcess implements MessageConstants
 						+ ", PieceSize = " + Configurations.pieceSize);
 				br.close();
 			} catch (Exception e) {
-				showLog(peerId + e.toString());
+				print(peerId + e.toString());
 			}
 			
 			try {
@@ -89,7 +89,7 @@ public class peerProcess implements MessageConstants
 				}
 				br.close();
 			} catch (Exception e) {
-				showLog(peerId + e.toString());
+				print(peerId + e.toString());
 			}
 						
 			for (String key : peersMap.keySet()) {
@@ -116,7 +116,26 @@ public class peerProcess implements MessageConstants
 			
 			bit = new BitOperator();
 			int flag = isPrimary?1:0;
-			bit.initOwnBitfield(peerId, flag);
+			if (flag != 1) 
+				{
+		
+					for (int i = 0; i < bit.size; i++) 
+					{
+						bit.pieces[i].setIsPresent(0);
+						bit.pieces[i].setFromPeerID(peerId);
+					}
+		
+				} 
+				else 
+				{
+		
+					for (int i = 0; i < bit.size; i++) 
+					{
+						bit.pieces[i].setIsPresent(1);
+						bit.pieces[i].setFromPeerID(peerId);
+					}
+		
+				}
 			
 			mainThread = new Thread(new MessageProcessor(peerId));
 			mainThread.start();
@@ -131,14 +150,14 @@ public class peerProcess implements MessageConstants
 				}
 				catch(SocketTimeoutException e)
 				{
-					showLog(peerId + e.toString());
-					LogGenerator.stop();
+					print(peerId + e.toString());
+					Logger.stop();
 					System.exit(0);
 				}
 				catch(IOException e)
 				{
-					showLog(peerId + e.toString());
-					LogGenerator.stop();
+					print(peerId + e.toString());
+					Logger.stop();
 					System.exit(0);
 				}
 			}
@@ -155,7 +174,7 @@ public class peerProcess implements MessageConstants
 						outputstream.close();
 				} 
 				catch (Exception e) {
-					showLog(peerId + " Error in making the file : " + e.getMessage());
+					print(peerId + " Error in making the file : " + e.getMessage());
 				}
 				for (String key : peersMap.keySet())
 				{
@@ -177,14 +196,14 @@ public class peerProcess implements MessageConstants
 				}
 				catch(SocketTimeoutException e)
 				{
-					showLog(peerId + " gets time out exception in Starting the listening thread: " + e.toString());
-					LogGenerator.stop();
+					print(peerId + " gets time out exception in Starting the listening thread: " + e.toString());
+					Logger.stop();
 					System.exit(0);
 				}
 				catch(IOException e)
 				{
-					showLog(peerId + " gets exception in Starting the listening thread: " + peerProcess.portNo + " "+ e.toString());
-					LogGenerator.stop();
+					print(peerId + " gets exception in Starting the listening thread: " + peerProcess.portNo + " "+ e.toString());
+					Logger.stop();
 					System.exit(0);
 				}
 			}
@@ -199,7 +218,7 @@ public class peerProcess implements MessageConstants
 			{
 				completed = completed();
 				if (completed) {
-					showLog("DOWNLOAD COMPLETE!!.");
+					print("DOWNLOAD COMPLETE!!.");
 
 					timer.cancel();
 					timer.cancel();
@@ -234,11 +253,11 @@ public class peerProcess implements MessageConstants
 		}
 		catch(Exception e)
 		{
-			showLog(peerId + " Exception in ending : " + e.getMessage() );
+			print(peerId + " Exception in ending : " + e.getMessage() );
 		}
 		finally
 		{
-			LogGenerator.stop();
+			Logger.stop();
 			System.exit(0);
 		}
 	}
@@ -266,7 +285,7 @@ public class peerProcess implements MessageConstants
 			}
 
 		} catch (Exception e) {
-			showLog(e.toString());
+			print(e.toString());
 			return false;
 		}
 

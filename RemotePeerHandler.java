@@ -1,7 +1,7 @@
 import java.net.*;
 import java.io.*;
 
-public class RemotePeerHandler implements Runnable, MessageConstants 
+public class RemotePeerHandler implements Runnable 
 {
 	private Socket peerSocket = null;
 	private InputStream in;
@@ -37,7 +37,7 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 		} 
 		catch (Exception ex) 
 		{
-			peerProcess.showLog(this.ownPeerId + " Error : " + ex.getMessage());
+			peerProcess.print(this.ownPeerId + " Error : " + ex.getMessage());
 		}
 	}
 	
@@ -51,11 +51,11 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 		} 
 		catch (UnknownHostException e) 
 		{
-			peerProcess.showLog(ownPeerID + " RemotePeerHandler : " + e.getMessage());
+			peerProcess.print(ownPeerID + " RemotePeerHandler : " + e.getMessage());
 		} 
 		catch (IOException e) 
 		{
-			peerProcess.showLog(ownPeerID + " RemotePeerHandler : " + e.getMessage());
+			peerProcess.print(ownPeerID + " RemotePeerHandler : " + e.getMessage());
 		}
 		this.connType = connType;
 		
@@ -66,7 +66,7 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 		} 
 		catch (Exception ex) 
 		{
-			peerProcess.showLog(ownPeerID + " RemotePeerHandler : " + ex.getMessage());
+			peerProcess.print(ownPeerID + " RemotePeerHandler : " + ex.getMessage());
 		}
 	}
 	
@@ -74,11 +74,11 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 	{
 		try 
 		{
-			out.write(HandshakeMessage.encodeMessage(new HandshakeMessage(MessageConstants.HANDSHAKE_HEADER, this.ownPeerId)));
+			out.write(HandshakeMessage.encodeMessage(new HandshakeMessage("P2PFILESHARINGPROJ", this.ownPeerId)));
 		} 
 		catch (IOException e) 
 		{
-			peerProcess.showLog(this.ownPeerId + " SendHandshake : " + e.getMessage());
+			peerProcess.print(this.ownPeerId + " SendHandshake : " + e.getMessage());
 			return false;
 		}
 		return true;
@@ -98,7 +98,7 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 		} 
 		catch (IOException e) 
 		{
-			peerProcess.showLog(this.ownPeerId + " ReceiveHandshake : " + e.getMessage());
+			peerProcess.print(this.ownPeerId + " ReceiveHandshake : " + e.getMessage());
 			return false;
 		}
 		return true;
@@ -108,11 +108,11 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 	{
 		try 
 		{
-			out.write(DataMessage.encodeMessage(new DataMessage( DATA_MSG_REQUEST, Converter.intToByteArray(index))));
+			out.write(DataMessage.encodeMessage(new DataMessage( "6", Converter.intToByteArray(index))));
 		} 
 		catch (IOException e) 
 		{
-			peerProcess.showLog(this.ownPeerId + " SendRequest : " + e.getMessage());
+			peerProcess.print(this.ownPeerId + " SendRequest : " + e.getMessage());
 			return false;
 		}
 		return true;
@@ -121,10 +121,10 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 	public boolean SendInterested()
 	{
 		try{
-			out.write(DataMessage.encodeMessage(new DataMessage(DATA_MSG_INTERESTED)));
+			out.write(DataMessage.encodeMessage(new DataMessage("2")));
 		} 
 		catch (IOException e){
-			peerProcess.showLog(this.ownPeerId + " SendInterested : " + e.getMessage());
+			peerProcess.print(this.ownPeerId + " SendInterested : " + e.getMessage());
 			return false;
 		}
 		return true;
@@ -133,10 +133,10 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 	public boolean SendNotInterested()
 	{
 		try{
-			out.write(DataMessage.encodeMessage(new DataMessage( DATA_MSG_NOTINTERESTED)));
+			out.write(DataMessage.encodeMessage(new DataMessage( "3")));
 		} 
 		catch (IOException e){
-			peerProcess.showLog(this.ownPeerId + " SendNotInterested : " + e.getMessage());
+			peerProcess.print(this.ownPeerId + " SendNotInterested : " + e.getMessage());
 			return false;
 		}
 		
@@ -152,13 +152,13 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 			in.read(receiveUnchokeByte);
 		} 
 		catch (IOException e){
-			peerProcess.showLog(this.ownPeerId + " ReceiveUnchoke : " + e.getMessage());
+			peerProcess.print(this.ownPeerId + " ReceiveUnchoke : " + e.getMessage());
 			return false;
 		}
 				
 		DataMessage m = DataMessage.decodeMessage(receiveUnchokeByte);
-		if(m.getMessageTypeString().equals(DATA_MSG_UNCHOKE)){
-			peerProcess.showLog(ownPeerId + "is unchoked by " + remotePeerId);
+		if(m.getMessageTypeString().equals("1")){
+			peerProcess.print(ownPeerId + "is unchoked by " + remotePeerId);
 			return true;
 		}
 		else 
@@ -174,21 +174,21 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 			if(in.available() == 0) return false;
 		} 
 		catch (IOException e){
-			peerProcess.showLog(this.ownPeerId + " ReceiveChoke : " + e.getMessage());
+			peerProcess.print(this.ownPeerId + " ReceiveChoke : " + e.getMessage());
 			return false;
 		}
 		try{
 			in.read(receiveChokeByte);
 		} 
 		catch (IOException e){
-			peerProcess.showLog(this.ownPeerId + " ReceiveChoke : " + e.getMessage());
+			peerProcess.print(this.ownPeerId + " ReceiveChoke : " + e.getMessage());
 			return false;
 		}
 		DataMessage m = DataMessage.decodeMessage(receiveChokeByte);
-		if(m.getMessageTypeString().equals(DATA_MSG_CHOKE))
+		if(m.getMessageTypeString().equals("0"))
 		{
 			// LOG 6:
-			peerProcess.showLog(ownPeerId + " is CHOKED by " + remotePeerId);
+			peerProcess.print(ownPeerId + " is CHOKED by " + remotePeerId);
 			return true;
 		}
 		else 
@@ -205,15 +205,15 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 		} 
 		catch (IOException e) 
 		{
-			peerProcess.showLog(this.ownPeerId + " receivePeice : " + e.getMessage());
+			peerProcess.print(this.ownPeerId + " receivePeice : " + e.getMessage());
 			return false;
 		}
 				
 		DataMessage m = DataMessage.decodeMessage(receivePeice);
-		if(m.getMessageTypeString().equals(DATA_MSG_UNCHOKE))
+		if(m.getMessageTypeString().equals("1"))
 		{	
 			// LOG 5:
-			peerProcess.showLog(ownPeerId + " is UNCHOKED by " + remotePeerId);
+			peerProcess.print(ownPeerId + " is UNCHOKED by " + remotePeerId);
 			return true;
 		}
 		else 
@@ -224,7 +224,7 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 	public void run() 
 	{	
 		byte []handshakeBuff = new byte[32];
-		byte []dataBuffWithoutPayload = new byte[DATA_MSG_LEN + DATA_MSG_TYPE];
+		byte []dataBuffWithoutPayload = new byte[4 + 1];
 		byte[] msgLength;
 		byte[] msgType;
 		DataMessageWrapper dataMsgWrapper = new DataMessageWrapper();
@@ -235,25 +235,25 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 			{
 				if(!SendHandshake())
 				{
-					peerProcess.showLog(ownPeerId + " HANDSHAKE sending failed.");
+					peerProcess.print(ownPeerId + " HANDSHAKE sending failed.");
 					System.exit(0);
 				}
 				else
 				{
-					peerProcess.showLog(ownPeerId + " HANDSHAKE has been sent...");
+					peerProcess.print(ownPeerId + " HANDSHAKE has been sent...");
 				}
 				while(true)
 				{
 					in.read(handshakeBuff);
 					handshakeMessage = HandshakeMessage.decodeMessage(handshakeBuff);
-					if(handshakeMessage.getHeaderString().equals(MessageConstants.HANDSHAKE_HEADER))
+					if(handshakeMessage.getHeaderString().equals("P2PFILESHARINGPROJ"))
 					{
 						
 						remotePeerId = handshakeMessage.getPeerIDString();
 						
-						peerProcess.showLog(ownPeerId + " makes a connection to Peer " + remotePeerId);
+						peerProcess.print(ownPeerId + " makes a connection to Peer " + remotePeerId);
 						
-						peerProcess.showLog(ownPeerId + " Received a HANDSHAKE message from Peer " + remotePeerId);
+						peerProcess.print(ownPeerId + " Received a HANDSHAKE message from Peer " + remotePeerId);
 						
 						//populate peerID to socket mapping
 						peerProcess.socketMap.put(remotePeerId, this.peerSocket);
@@ -266,7 +266,7 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 				}
 				
 				// Sending BitField...
-				DataMessage d = new DataMessage(DATA_MSG_BITFIELD, peerProcess.bit.encode());
+				DataMessage d = new DataMessage("5", peerProcess.bit.getBytes());
 				byte  []b = DataMessage.encodeMessage(d);  
 				out.write(b);
 				peerProcess.peersMap.get(remotePeerId).state = 8;
@@ -278,12 +278,12 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 				{
 					in.read(handshakeBuff);
 					handshakeMessage = HandshakeMessage.decodeMessage(handshakeBuff);
-					if(handshakeMessage.getHeaderString().equals(MessageConstants.HANDSHAKE_HEADER))
+					if(handshakeMessage.getHeaderString().equals("P2PFILESHARINGPROJ"))
 					{
 						remotePeerId = handshakeMessage.getPeerIDString();
 						
-						peerProcess.showLog(ownPeerId + " makes a connection to Peer " + remotePeerId);
-						peerProcess.showLog(ownPeerId + " Received a HANDSHAKE message from Peer " + remotePeerId);
+						peerProcess.print(ownPeerId + " makes a connection to Peer " + remotePeerId);
+						peerProcess.print(ownPeerId + " Received a HANDSHAKE message from Peer " + remotePeerId);
 						
 						//populate peerID to socket mapping
 						peerProcess.socketMap.put(remotePeerId, this.peerSocket);
@@ -296,12 +296,12 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 				}
 				if(!SendHandshake())
 				{
-					peerProcess.showLog(ownPeerId + " HANDSHAKE message sending failed.");
+					peerProcess.print(ownPeerId + " HANDSHAKE message sending failed.");
 					System.exit(0);
 				}
 				else
 				{
-					peerProcess.showLog(ownPeerId + " HANDSHAKE message has been sent successfully.");
+					peerProcess.print(ownPeerId + " HANDSHAKE message has been sent successfully.");
 				}
 				
 				peerProcess.peersMap.get(remotePeerId).state = 2;
@@ -315,17 +315,17 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 				if(headerBytes == -1)
 					break;
 
-				msgLength = new byte[DATA_MSG_LEN];
-				msgType = new byte[DATA_MSG_TYPE];
-				System.arraycopy(dataBuffWithoutPayload, 0, msgLength, 0, DATA_MSG_LEN);
-				System.arraycopy(dataBuffWithoutPayload, DATA_MSG_LEN, msgType, 0, DATA_MSG_TYPE);
+				msgLength = new byte[4];
+				msgType = new byte[1];
+				System.arraycopy(dataBuffWithoutPayload, 0, msgLength, 0, 4);
+				System.arraycopy(dataBuffWithoutPayload, 4, msgType, 0, 1);
 				DataMessage dataMessage = new DataMessage();
 				dataMessage.setMessageLength(msgLength);
 				dataMessage.setMessageType(msgType);
-				if(dataMessage.getMessageTypeString().equals(MessageConstants.DATA_MSG_CHOKE)
-						||dataMessage.getMessageTypeString().equals(MessageConstants.DATA_MSG_UNCHOKE)
-						||dataMessage.getMessageTypeString().equals(MessageConstants.DATA_MSG_INTERESTED)
-						||dataMessage.getMessageTypeString().equals(MessageConstants.DATA_MSG_NOTINTERESTED)){
+				if(dataMessage.getMessageTypeString().equals("0")
+						||dataMessage.getMessageTypeString().equals("1")
+						||dataMessage.getMessageTypeString().equals("2")
+						||dataMessage.getMessageTypeString().equals("3")){
 					dataMsgWrapper.dataMsg = dataMessage;
 					dataMsgWrapper.fromPeerID = this.remotePeerId;
 					peerProcess.offer(dataMsgWrapper);
@@ -341,9 +341,9 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 						bytesAlreadyRead += bytesRead;
 					}
 					
-					byte []dataBuffWithPayload = new byte [dataMessage.getMessageLengthInt()+DATA_MSG_LEN];
-					System.arraycopy(dataBuffWithoutPayload, 0, dataBuffWithPayload, 0, DATA_MSG_LEN + DATA_MSG_TYPE);
-					System.arraycopy(dataBuffPayload, 0, dataBuffWithPayload, DATA_MSG_LEN + DATA_MSG_TYPE, dataBuffPayload.length);
+					byte []dataBuffWithPayload = new byte [dataMessage.getMessageLengthInt()+4];
+					System.arraycopy(dataBuffWithoutPayload, 0, dataBuffWithPayload, 0, 4 + 1);
+					System.arraycopy(dataBuffPayload, 0, dataBuffWithPayload, 4 + 1, dataBuffPayload.length);
 					
 					DataMessage dataMsgWithPayload = DataMessage.decodeMessage(dataBuffWithPayload);
 					dataMsgWrapper.dataMsg = dataMsgWithPayload;
@@ -357,7 +357,7 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 			}
 		}
 		catch(IOException e){
-			peerProcess.showLog(ownPeerId + " run exception: " + e);
+			peerProcess.print(ownPeerId + " run exception: " + e);
 		}	
 		
 	}
@@ -373,7 +373,7 @@ public class RemotePeerHandler implements Runnable, MessageConstants
 			if (out != null)
 				out.close();
 		} catch (IOException e) {
-			peerProcess.showLog(ownPeerId + " Release socket IO exception: " + e);
+			peerProcess.print(ownPeerId + " Release socket IO exception: " + e);
 		}
 	}
 }

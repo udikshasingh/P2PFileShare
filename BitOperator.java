@@ -6,7 +6,7 @@ import java.io.FileWriter;
 import java.io.RandomAccessFile;
 
 
-public class BitOperator implements MessageConstants 
+public class BitOperator 
 {
 	public Piece[] pieces;
 	public int size;
@@ -21,31 +21,31 @@ public class BitOperator implements MessageConstants
 
 	}
 	
-	public void setSize(int size) 
-	{
-		this.size = size;
-	}
-
-	public int getSize() 
-	{
-		return size;
-	}
-	
-	public void setPieces(Piece[] pieces) 
-	{
-		this.pieces = pieces;
-	}
-
-	public Piece[] getPieces() 
-	{
-		return pieces;
-	}
-	
-	public byte[] encode()
-	{
-		return this.getBytes();
-	}
-	
+//	public void setSize(int size) 
+//	{
+//		this.size = size;
+//	}
+//
+//	public int getSize() 
+//	{
+//		return size;
+//	}
+//	
+//	public void setPieces(Piece[] pieces) 
+//	{
+//		this.pieces = pieces;
+//	}
+//
+//	public Piece[] getPieces() 
+//	{
+//		return pieces;
+//	}
+//	
+//	public byte[] encode()
+//	{
+//		return this.getBytes();
+//	}
+//	
 	public static BitOperator decode(byte[] b)
 	{
 		BitOperator returnBitField = new BitOperator();
@@ -72,13 +72,13 @@ public class BitOperator implements MessageConstants
 	
 	public synchronized boolean compare(BitOperator yourBitField) 
 	{
-		int yourSize = yourBitField.getSize();
+		int yourSize = yourBitField.size;
 		
 
 		for (int i = 0; i < yourSize; i++) 
 		{
-			if (yourBitField.getPieces()[i].getIsPresent() == 1
-					&& this.getPieces()[i].getIsPresent() == 0) 
+			if (yourBitField.pieces[i].getIsPresent() == 1
+					&& this.pieces[i].getIsPresent() == 0) 
 			{
 				return true;
 			} else
@@ -90,15 +90,15 @@ public class BitOperator implements MessageConstants
 
 	public synchronized int returnFirstDiff(BitOperator yourBitField) 
 	{
-		int mySize = this.getSize();
-		int yourSize = yourBitField.getSize();
+		int mySize = this.size;
+		int yourSize = yourBitField.size;
 
 		if (mySize >= yourSize) 
 		{
 			for (int i = 0; i < yourSize; i++) 
 			{
-				if (yourBitField.getPieces()[i].getIsPresent() == 1
-						&& this.getPieces()[i].getIsPresent() == 0) 
+				if (yourBitField.pieces[i].getIsPresent() == 1
+						&& this.pieces[i].getIsPresent() == 0) 
 				{
 					return i;
 				}
@@ -108,8 +108,8 @@ public class BitOperator implements MessageConstants
 		{
 			for (int i = 0; i < mySize; i++) 
 			{
-				if (yourBitField.getPieces()[i].getIsPresent() == 1
-						&& this.getPieces()[i].getIsPresent() == 0) 
+				if (yourBitField.pieces[i].getIsPresent() == 1
+						&& this.pieces[i].getIsPresent() == 0) 
 				{
 					return i;
 				}
@@ -227,7 +227,7 @@ public class BitOperator implements MessageConstants
 		{
 			if (peerProcess.bit.pieces[piece.pieceIndex].isPresent == 1) 
 			{
-				peerProcess.showLog(peerId + " Piece already received..!");
+				peerProcess.print(peerId + " Piece already received..!");
 			} 
 			else 
 			{
@@ -245,7 +245,7 @@ public class BitOperator implements MessageConstants
 				this.pieces[piece.pieceIndex].setFromPeerID(peerId);
 				raf.close();
 				
-				peerProcess.showLog(peerProcess.peerId
+				peerProcess.print(peerProcess.peerId
 						+ " has downloaded the PIECE " + piece.pieceIndex
 						+ " from Peer " + peerId
 						+ ". Now the number of pieces it has is "
@@ -257,14 +257,14 @@ public class BitOperator implements MessageConstants
 					peerProcess.peersMap.get(peerProcess.peerId).isChoked = 0;
 					updatePeerInfo(peerProcess.peerId, 1);
 					
-					peerProcess.showLog(peerProcess.peerId + " has DOWNLOADED the complete file.");
+					peerProcess.print(peerProcess.peerId + " has DOWNLOADED the complete file.");
 				}
 			}
 
 		} 
 		catch (Exception e) 
 		{
-			peerProcess.showLog(peerProcess.peerId
+			peerProcess.print(peerProcess.peerId
 					+ " EROR in updating bitfield " + e.getMessage());
 		}
 
@@ -330,7 +330,7 @@ public class BitOperator implements MessageConstants
 		} 
 		catch (Exception e) 
 		{
-			peerProcess.showLog(clientID + " Error in updating the PeerInfo.cfg " +  e.getMessage());
+			peerProcess.print(clientID + " Error in updating the PeerInfo.cfg " +  e.getMessage());
 		}
 	}
 	

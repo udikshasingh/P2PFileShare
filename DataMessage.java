@@ -1,11 +1,11 @@
 
 import java.io.UnsupportedEncodingException;
 
-public class DataMessage implements MessageConstants 
+public class DataMessage 
 {
     private String messageType;
     private String messageLength;
-    private int dataLength = DATA_MSG_TYPE;
+    private int dataLength = 1;
     private byte[] type = null;
 	private byte[] len = null;
 	private byte[] payload = null;
@@ -14,9 +14,9 @@ public class DataMessage implements MessageConstants
         
         try {
             
-            if (Type == DATA_MSG_CHOKE || Type == DATA_MSG_UNCHOKE
-                || Type == DATA_MSG_INTERESTED
-                || Type == DATA_MSG_NOTINTERESTED)
+            if (Type == "0" || Type == "1"
+                || Type == "2"
+                || Type == "3")
             {
                 this.setMessageLength(1);
                 this.setMessageType(Type);
@@ -27,7 +27,7 @@ public class DataMessage implements MessageConstants
             
             
         } catch (Exception e) {
-            peerProcess.showLog(e.toString());
+            peerProcess.print(e.toString());
         }
         
     }
@@ -43,7 +43,7 @@ public class DataMessage implements MessageConstants
 			{
 				
                 this.setMessageLength(Payload.length + 1);
-                if (this.len.length > DATA_MSG_LEN)
+                if (this.len.length > 4)
                     throw new Exception("DataMessage:: Constructor - message length is too large.");
                 
                 this.setPayload(Payload);
@@ -51,9 +51,9 @@ public class DataMessage implements MessageConstants
 			} 
 			else
 			{
-                if (Type == DATA_MSG_CHOKE || Type == DATA_MSG_UNCHOKE
-                    || Type == DATA_MSG_INTERESTED
-                    || Type == DATA_MSG_NOTINTERESTED)
+                if (Type == "0" || Type == "1"
+                    || Type == "2"
+                    || Type == "3")
                 {
                     this.setMessageLength(1);
                     this.payload = null;
@@ -65,11 +65,11 @@ public class DataMessage implements MessageConstants
 			}
 
 			this.setMessageType(Type);
-			if (this.getMessageType().length > DATA_MSG_TYPE)
+			if (this.getMessageType().length > 1)
 				throw new Exception("DataMessage:: Constructor - Type length is too large.");
 
 		} catch (Exception e) {
-			peerProcess.showLog(e.toString());
+			peerProcess.print(e.toString());
 		}
 
 	}
@@ -113,19 +113,19 @@ public class DataMessage implements MessageConstants
 
 	public void setMessageType(byte[] type) {
 		try {
-			this.messageType = new String(type, MSG_CHARSET_NAME);
+			this.messageType = new String(type, "UTF8");
 			this.type = type;
 		} catch (UnsupportedEncodingException e) {
-			peerProcess.showLog(e.toString());
+			peerProcess.print(e.toString());
 		}
 	}
 	
 	public void setMessageType(String messageType) {
 		try {
 			this.messageType = messageType.trim();
-			this.type = this.messageType.getBytes(MSG_CHARSET_NAME);
+			this.type = this.messageType.getBytes("UTF8");
 		} catch (UnsupportedEncodingException e) {
-			peerProcess.showLog(e.toString());
+			peerProcess.print(e.toString());
 		}
 	}
 	
@@ -156,10 +156,10 @@ public class DataMessage implements MessageConstants
 					+ ", Message Type - "
 					+ this.messageType
 					+ ", Data - "
-					+ (new String(this.payload, MSG_CHARSET_NAME)).toString()
+					+ (new String(this.payload, "UTF8")).toString()
 							.trim();
 		} catch (UnsupportedEncodingException e) {
-			peerProcess.showLog(e.toString());
+			peerProcess.print(e.toString());
 		}
 		return str;
 	}
@@ -174,7 +174,7 @@ public class DataMessage implements MessageConstants
         {
             
             msgType =Integer.parseInt(msg.getMessageTypeString());
-            if (msg.getMessageLength().length > DATA_MSG_LEN)
+            if (msg.getMessageLength().length > 4)
                 throw new Exception("Invalid message length.");
             else if (msgType < 0 || msgType > 7)
                 throw new Exception("Invalid message type.");
@@ -184,25 +184,25 @@ public class DataMessage implements MessageConstants
                 throw new Exception("Invalid message length.");
             
             if (msg.getPayload()!= null) {
-                msgStream = new byte[DATA_MSG_LEN + DATA_MSG_TYPE + msg.getPayload().length];
+                msgStream = new byte[4 + 1 + msg.getPayload().length];
                 
                 System.arraycopy(msg.getMessageLength(), 0, msgStream, 0, msg.getMessageLength().length);
-                System.arraycopy(msg.getMessageType(), 0, msgStream, DATA_MSG_LEN, DATA_MSG_TYPE);
-                System.arraycopy(msg.getPayload(), 0, msgStream, DATA_MSG_LEN + DATA_MSG_TYPE, msg.getPayload().length);
+                System.arraycopy(msg.getMessageType(), 0, msgStream, 4, 1);
+                System.arraycopy(msg.getPayload(), 0, msgStream, 4 + 1, msg.getPayload().length);
                 
                 
             } else {
-                msgStream = new byte[DATA_MSG_LEN + DATA_MSG_TYPE];
+                msgStream = new byte[4 + 1];
                 
                 System.arraycopy(msg.getMessageLength(), 0, msgStream, 0, msg.getMessageLength().length);
-                System.arraycopy(msg.getMessageType(), 0, msgStream, DATA_MSG_LEN, DATA_MSG_TYPE);
+                System.arraycopy(msg.getMessageType(), 0, msgStream, 4, 1);
                 
             }
             
         }
         catch (Exception e)
         {
-            peerProcess.showLog(e.toString());
+            peerProcess.print(e.toString());
             msgStream = null;
         }
         
@@ -216,8 +216,8 @@ public class DataMessage implements MessageConstants
 
 		
 		DataMessage msg = new DataMessage();
-		byte[] msgLength = new byte[DATA_MSG_LEN];
-		byte[] msgType = new byte[DATA_MSG_TYPE];
+		byte[] msgLength = new byte[4];
+		byte[] msgType = new byte[1];
 		byte[] payLoad = null;
 		int len;
 
@@ -226,12 +226,12 @@ public class DataMessage implements MessageConstants
 			
 			if (Message == null)
 				throw new Exception("Invalid data.");
-			else if (Message.length < DATA_MSG_LEN + DATA_MSG_TYPE)
+			else if (Message.length < 4 + 1)
 				throw new Exception("Byte array length is too small...");
 
 			
-			System.arraycopy(Message, 0, msgLength, 0, DATA_MSG_LEN);
-			System.arraycopy(Message, DATA_MSG_LEN, msgType, 0, DATA_MSG_TYPE);
+			System.arraycopy(Message, 0, msgLength, 0, 4);
+			System.arraycopy(Message, 4, msgType, 0, 1);
 
 			msg.setMessageLength(msgLength);
 			msg.setMessageType(msgType);
@@ -241,7 +241,7 @@ public class DataMessage implements MessageConstants
 			if (len > 1) 
 			{
 				payLoad = new byte[len-1];
-				System.arraycopy(Message, DATA_MSG_LEN + DATA_MSG_TYPE,	payLoad, 0, Message.length - DATA_MSG_LEN - DATA_MSG_TYPE);
+				System.arraycopy(Message, 4 + 1,	payLoad, 0, Message.length - 4 - 1);
 				msg.setPayload(payLoad);
 			}
 			
@@ -249,7 +249,7 @@ public class DataMessage implements MessageConstants
 		} 
 		catch (Exception e) 
 		{
-			peerProcess.showLog(e.toString());
+			peerProcess.print(e.toString());
 			msg = null;
 		}
 		return msg;

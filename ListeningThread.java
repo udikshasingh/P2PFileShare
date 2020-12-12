@@ -24,13 +24,13 @@ public class ListeningThread implements Runnable
 				remoteSocket = SocketListening.accept();
 				// instantiates thread for handling individual remote peer
 				sendingThread = new Thread(new RemotePeerHandler(remoteSocket,0,peerID));
-				peerProcess.showLog(peerID + " Connection is established");
+				peerProcess.print(peerID + " Connection is established");
 				peerProcess.sendingThread.add(sendingThread);
 				sendingThread.start(); 
 			}
 			catch(Exception e)
 			{
-				peerProcess.showLog(this.peerID + " Exception in connection: " + e.toString());
+				peerProcess.print(this.peerID + " Exception in connection: " + e.toString());
 			}
 		}
 	}
