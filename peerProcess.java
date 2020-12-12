@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 public class peerProcess 
 {
@@ -37,8 +38,12 @@ public class peerProcess
 	}
 	public static void print(String message)
 	{
-		Logger.info(DateUtil.getTime() + ": Peer " + message);
-		System.out.println(DateUtil.getTime() + ": Peer " + message);
+		Calendar cal = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		//return sdf.format(cal.getTime());
+		String timestamp = (sdf.format(cal.getTime()));
+		Logger.info(timestamp + ": Peer " + message);
+		System.out.println(timestamp + ": Peer " + message);
 	}
 	
 	@SuppressWarnings("deprecation")

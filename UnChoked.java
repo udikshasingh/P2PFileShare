@@ -10,15 +10,15 @@ import java.util.Vector;
 public class UnChoked  extends TimerTask {
 	private static void sendUnChoke(Socket socket, String remotePeerID) {
 		peerProcess.print(peerProcess.peerId + " is sending UNCHOKE message to remote Peer " + remotePeerID);
-		DataMessage d = new DataMessage("1");
-		byte[] msgByte = DataMessage.encodeMessage(d);
+		Data d = new Data("1");
+		byte[] msgByte = Data.encodeMessage(d);
 		SendData(socket, msgByte);
 	}
 	private static void sendHave(Socket socket, String remotePeerID) {
 		byte[] encodedBitField = peerProcess.bit.getBytes();
 		peerProcess.print(peerProcess.peerId + " sending HAVE message to Peer " + remotePeerID);
-		DataMessage d = new DataMessage("5", encodedBitField);
-		SendData(socket,DataMessage.encodeMessage(d));
+		Data d = new Data("5", encodedBitField);
+		SendData(socket,Data.encodeMessage(d));
 		encodedBitField = null;
 	}
 	private static int SendData(Socket socket, byte[] encodedBitField) {

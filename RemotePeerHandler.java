@@ -108,7 +108,7 @@ public class RemotePeerHandler implements Runnable
 	{
 		try 
 		{
-			out.write(DataMessage.encodeMessage(new DataMessage( "6", Conversion.intToByteArray(index))));
+			out.write(Data.encodeMessage(new Data( "6", Conversion.intToByteArray(index))));
 		} 
 		catch (IOException e) 
 		{
@@ -121,7 +121,7 @@ public class RemotePeerHandler implements Runnable
 	public boolean SendInterested()
 	{
 		try{
-			out.write(DataMessage.encodeMessage(new DataMessage("2")));
+			out.write(Data.encodeMessage(new Data("2")));
 		} 
 		catch (IOException e){
 			peerProcess.print(this.ownPeerId + " SendInterested : " + e.getMessage());
@@ -133,7 +133,7 @@ public class RemotePeerHandler implements Runnable
 	public boolean SendNotInterested()
 	{
 		try{
-			out.write(DataMessage.encodeMessage(new DataMessage( "3")));
+			out.write(Data.encodeMessage(new Data( "3")));
 		} 
 		catch (IOException e){
 			peerProcess.print(this.ownPeerId + " SendNotInterested : " + e.getMessage());
@@ -156,7 +156,7 @@ public class RemotePeerHandler implements Runnable
 			return false;
 		}
 				
-		DataMessage m = DataMessage.decodeMessage(receiveUnchokeByte);
+		Data m = Data.decodeMessage(receiveUnchokeByte);
 		if(m.typeOfMsg.equals("1")){
 			peerProcess.print(ownPeerId + "is unchoked by " + remotePeerId);
 			return true;
@@ -184,7 +184,7 @@ public class RemotePeerHandler implements Runnable
 			peerProcess.print(this.ownPeerId + " ReceiveChoke : " + e.getMessage());
 			return false;
 		}
-		DataMessage m = DataMessage.decodeMessage(receiveChokeByte);
+		Data m = Data.decodeMessage(receiveChokeByte);
 		if(m.typeOfMsg.equals("0"))
 		{
 			// LOG 6:
@@ -209,7 +209,7 @@ public class RemotePeerHandler implements Runnable
 			return false;
 		}
 				
-		DataMessage m = DataMessage.decodeMessage(receivePeice);
+		Data m = Data.decodeMessage(receivePeice);
 		if(m.typeOfMsg.equals("1"))
 		{	
 			// LOG 5:
@@ -266,8 +266,8 @@ public class RemotePeerHandler implements Runnable
 				}
 				
 				// Sending BitField...
-				DataMessage d = new DataMessage("5", peerProcess.bit.getBytes());
-				byte  []b = DataMessage.encodeMessage(d);  
+				Data d = new Data("5", peerProcess.bit.getBytes());
+				byte  []b = Data.encodeMessage(d);  
 				out.write(b);
 				peerProcess.peersMap.get(remotePeerId).state = 8;
 			}
@@ -319,7 +319,7 @@ public class RemotePeerHandler implements Runnable
 				msgType = new byte[1];
 				System.arraycopy(dataBuffWithoutPayload, 0, msgLength, 0, 4);
 				System.arraycopy(dataBuffWithoutPayload, 4, msgType, 0, 1);
-				DataMessage dataMessage = new DataMessage();
+				Data dataMessage = new Data();
 				//dataMessage.setMessageLength(msgLength);
 				Integer l = Conversion.byteArrayToInt(msgLength, 0);
 				dataMessage.size = l.toString();
@@ -355,7 +355,7 @@ public class RemotePeerHandler implements Runnable
 					System.arraycopy(dataBuffWithoutPayload, 0, dataBuffWithPayload, 0, 4 + 1);
 					System.arraycopy(dataBuffPayload, 0, dataBuffWithPayload, 4 + 1, dataBuffPayload.length);
 					
-					DataMessage dataMsgWithPayload = DataMessage.decodeMessage(dataBuffWithPayload);
+					Data dataMsgWithPayload = Data.decodeMessage(dataBuffWithPayload);
 					dataMsgWrapper.dataMsg = dataMsgWithPayload;
 					dataMsgWrapper.fromPeerID = remotePeerId;
 					peerProcess.offer(dataMsgWrapper);

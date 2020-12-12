@@ -6,9 +6,8 @@ JFLAGS = -g
 
 CLASSES = \
 	Conversion.java \
-	DataMessage.java \
+	Data.java \
 	DataMessageWrapper.java \
-	DateUtil.java \
 	HandshakeMessage.java \
 	ListeningThread.java \
 	Logger.java \

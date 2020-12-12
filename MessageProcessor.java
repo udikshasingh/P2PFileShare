@@ -35,7 +35,7 @@ public class MessageProcessor implements Runnable
 
 	public void run()
 	{
-		DataMessage d;
+		Data d;
 		DataMessageWrapper dataWrapper;
 		String msgType;
 		String rPeerId;
@@ -318,8 +318,8 @@ public class MessageProcessor implements Runnable
 		byte[] pieceIndexByte = Conversion.intToByteArray(pieceNo);
 		System.arraycopy(pieceIndexByte, 0, pieceByte, 0,
 						pieceIndexByte.length);
-		DataMessage d = new DataMessage("6", pieceByte);
-		byte[] b = DataMessage.encodeMessage(d);
+		Data d = new Data("6", pieceByte);
+		byte[] b = Data.encodeMessage(d);
 		SendData(socket, b);
 
 		pieceByte = null;
@@ -328,7 +328,7 @@ public class MessageProcessor implements Runnable
 		d = null;
 	}
 
-	private void sendPeice(Socket socket, DataMessage d, String remotePeerID)  //d == requestmessage
+	private void sendPeice(Socket socket, Data d, String remotePeerID)  //d == requestmessage
 	{
 		byte[] bytePieceIndex = d.content;
 		int pieceIndex = Conversion.byteArrayToInt(bytePieceIndex, 0);
@@ -362,8 +362,8 @@ public class MessageProcessor implements Runnable
 		System.arraycopy(bytePieceIndex, 0, buffer, 0, 4);
 		System.arraycopy(byteRead, 0, buffer, 4, noBytesRead);
 
-		DataMessage sendMessage = new DataMessage("7", buffer);
-		byte[] b =  DataMessage.encodeMessage(sendMessage);
+		Data sendMessage = new Data("7", buffer);
+		byte[] b =  Data.encodeMessage(sendMessage);
 		SendData(socket, b);
 		
 		//release memory
@@ -382,20 +382,20 @@ public class MessageProcessor implements Runnable
 	private void sendNotInterested(Socket socket, String remotePeerID) 
 	{
 		peerProcess.print(peerProcess.peerId + " sending a NOT INTERESTED message to Peer " + remotePeerID);
-		DataMessage d =  new DataMessage("3");
-		byte[] msgByte = DataMessage.encodeMessage(d);
+		Data d =  new Data("3");
+		byte[] msgByte = Data.encodeMessage(d);
 		SendData(socket,msgByte);
 	}
 
 	private void sendInterested(Socket socket, String remotePeerID) {
 		peerProcess.print(peerProcess.peerId + " sending an INTERESTED message to Peer " + remotePeerID);
-		DataMessage d =  new DataMessage("2");
-		byte[] msgByte = DataMessage.encodeMessage(d);
+		Data d =  new Data("2");
+		byte[] msgByte = Data.encodeMessage(d);
 		SendData(socket,msgByte);		
 	}
 
 	
-	private boolean isInterested(DataMessage d, String rPeerId) {		
+	private boolean isInterested(Data d, String rPeerId) {		
 		
 		Conversion b = Conversion.convert(d.content);
 		peerProcess.peersMap.get(rPeerId).bitField = b;
@@ -425,15 +425,15 @@ public class MessageProcessor implements Runnable
 	private void sendUnChoke(Socket socket, String remotePeerID) {
 
 		peerProcess.print(peerProcess.peerId + " sending UNCHOKE message to Peer " + remotePeerID);
-		DataMessage d = new DataMessage("1");
-		byte[] msgByte = DataMessage.encodeMessage(d);
+		Data d = new Data("1");
+		byte[] msgByte = Data.encodeMessage(d);
 		SendData(socket,msgByte);
 	}
 
 	private void sendChoke(Socket socket, String remotePeerID) {
 		peerProcess.print(peerProcess.peerId + " sending CHOKE message to Peer " + remotePeerID);
-		DataMessage d = new DataMessage("0");
-		byte[] msgByte = DataMessage.encodeMessage(d);
+		Data d = new Data("0");
+		byte[] msgByte = Data.encodeMessage(d);
 		SendData(socket,msgByte);
 	}
 
@@ -442,8 +442,8 @@ public class MessageProcessor implements Runnable
 		peerProcess.print(peerProcess.peerId + " sending BITFIELD message to Peer " + remotePeerID);
 		byte[] encodedBitField = peerProcess.bit.getBytes();
 
-		DataMessage d = new DataMessage("5", encodedBitField);
-		SendData(socket,DataMessage.encodeMessage(d));
+		Data d = new Data("5", encodedBitField);
+		SendData(socket,Data.encodeMessage(d));
 		
 		encodedBitField = null;
 	}
@@ -453,8 +453,8 @@ public class MessageProcessor implements Runnable
 		
 		peerProcess.print(peerProcess.peerId + " sending HAVE message to Peer " + remotePeerID);
 		byte[] encodedBitField = peerProcess.bit.getBytes();
-		DataMessage d = new DataMessage("4", encodedBitField);
-		SendData(socket,DataMessage.encodeMessage(d));
+		Data d = new Data("4", encodedBitField);
+		SendData(socket,Data.encodeMessage(d));
 		
 		encodedBitField = null;
 	}
