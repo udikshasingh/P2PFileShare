@@ -35,7 +35,7 @@ public class Piece
 		byte[] byteIndex = new byte[MessageConstants.PIECE_INDEX_LEN];
 		Piece piece = new Piece();
 		System.arraycopy(payload, 0, byteIndex, 0, MessageConstants.PIECE_INDEX_LEN);
-		piece.pieceIndex = ConversionUtil.byteArrayToInt(byteIndex);
+		piece.pieceIndex = Converter.byteArrayToInt(byteIndex);
 		piece.filePiece = new byte[payload.length-MessageConstants.PIECE_INDEX_LEN];
 		System.arraycopy(payload, MessageConstants.PIECE_INDEX_LEN, piece.filePiece, 0, payload.length-MessageConstants.PIECE_INDEX_LEN);
 		return piece;
