@@ -4,8 +4,8 @@ import java.net.Socket;
 
 public class ListeningThread implements Runnable 
 {
-	private ServerSocket SocketListening;
-	private String peerID;
+	 ServerSocket SocketListening;
+	 String peerID;
 	Socket remoteSocket;
 	Thread sendingThread;
 	
@@ -35,17 +35,14 @@ public class ListeningThread implements Runnable
 		}
 	}
 	
-	public void releaseSocket()
+	public void shutdown()
 	{
-		try 
-		{
+		try {
 			if(!remoteSocket.isClosed())
 			remoteSocket.close();
 		} 
 		catch (IOException e) 
-		{
-			e.printStackTrace();
-		}
+		{}
 	}
 }
 

@@ -36,14 +36,14 @@ public class MessageProcessor implements Runnable
 	public void run()
 	{
 		Data d;
-		DataMessageWrapper dataWrapper;
+		Source dataWrapper;
 		String msgType;
 		String rPeerId;
 				
 		while(running)
 		{
 			//dataWrapper  = peerProcess.removeFromMsgQueue();
-			DataMessageWrapper msg = null;
+			Source msg = null;
 			if(!peerProcess.queue.isEmpty())
 			{
 				msg = peerProcess.queue.remove();
@@ -57,7 +57,7 @@ public class MessageProcessor implements Runnable
 				} catch (InterruptedException e) {
 				   e.printStackTrace();
 				}
-				DataMessageWrapper msg2 = null;
+				Source msg2 = null;
 				if(!peerProcess.queue.isEmpty())
 				{
 					msg2 = peerProcess.queue.remove();
@@ -66,10 +66,10 @@ public class MessageProcessor implements Runnable
 				//dataWrapper  = peerProcess.removeFromMsgQueue();
 			}
 			
-			d = dataWrapper.getDataMsg();
+			d = dataWrapper.data;
 			
 			msgType = d.typeOfMsg;
-			rPeerId = dataWrapper.getFromPeerID();
+			rPeerId = dataWrapper.source;
 			int state = peerProcess.peersMap.get(rPeerId).state;
 			if(msgType.equals("4") && state != 14)
 			{

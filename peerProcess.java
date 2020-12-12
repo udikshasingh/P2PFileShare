@@ -18,7 +18,8 @@ public class peerProcess
 	public static volatile Timer timerUnChok;
 	
 	public static volatile Hashtable<String, RemotePeerInfo> unchokedNeighbors = new Hashtable<String, RemotePeerInfo>();
-	public static  Queue<DataMessageWrapper> queue = new LinkedList<>();
+	//public static  Queue<DataMessageWrapper> queue = new LinkedList<>();
+	public static  Queue<Source> queue = new LinkedList<>();
 	public static Map<String, Socket> socketMap = new HashMap<>();
 	public static List<Thread> listeners = new ArrayList<Thread>();
 	public static List<Thread> sendingThread = new ArrayList<Thread>();
@@ -32,10 +33,12 @@ public class peerProcess
 	public static int pieceSize;
 	
 	
-	public static synchronized void offer(DataMessageWrapper msg)
+	public static synchronized void offer(Source msg)
 	{
 		queue.add(msg);
 	}
+	
+	
 	public static void print(String message)
 	{
 		Calendar cal = Calendar.getInstance();

@@ -9,7 +9,8 @@ public class Data
      byte[] bytearrt = null;
 	 byte[] bytearrl = null;
 	 byte[] content = null;
-	
+	String source;
+	 
 	 public Data()
 	    {}
 	 

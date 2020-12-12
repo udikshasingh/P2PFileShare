@@ -74,7 +74,7 @@ public class RemotePeerHandler implements Runnable
 	{
 		try 
 		{
-			out.write(HandshakeMessage.encodeMessage(new HandshakeMessage("P2PFILESHARINGPROJ", this.ownPeerId)));
+			out.write(HandshakeMessage.convertToByteArray(new HandshakeMessage("P2PFILESHARINGPROJ", this.ownPeerId)));
 		} 
 		catch (IOException e) 
 		{
@@ -90,8 +90,8 @@ public class RemotePeerHandler implements Runnable
 		try 
 		{
 			in.read(receivedHandshakeByte);
-			handshakeMessage = HandshakeMessage.decodeMessage(receivedHandshakeByte);
-			remotePeerId = handshakeMessage.getPeerIDString();
+			handshakeMessage = HandshakeMessage.convertToMessage(receivedHandshakeByte);
+			remotePeerId = handshakeMessage.peerId;
 			
 			//populate peerID to socket mapping
 			peerProcess.socketMap.put(remotePeerId, this.peerSocket);
@@ -227,7 +227,7 @@ public class RemotePeerHandler implements Runnable
 		byte []dataBuffWithoutPayload = new byte[4 + 1];
 		byte[] msgLength;
 		byte[] msgType;
-		DataMessageWrapper dataMsgWrapper = new DataMessageWrapper();
+		Source dataMsgWrapper = new Source();
 
 		try
 		{
@@ -245,11 +245,11 @@ public class RemotePeerHandler implements Runnable
 				while(true)
 				{
 					in.read(handshakeBuff);
-					handshakeMessage = HandshakeMessage.decodeMessage(handshakeBuff);
-					if(handshakeMessage.getHeaderString().equals("P2PFILESHARINGPROJ"))
+					handshakeMessage = HandshakeMessage.convertToMessage(handshakeBuff);
+					if(handshakeMessage.header.equals("P2PFILESHARINGPROJ"))
 					{
 						
-						remotePeerId = handshakeMessage.getPeerIDString();
+						remotePeerId = handshakeMessage.peerId;
 						
 						peerProcess.print(ownPeerId + " makes a connection to Peer " + remotePeerId);
 						
@@ -277,10 +277,10 @@ public class RemotePeerHandler implements Runnable
 				while(true)
 				{
 					in.read(handshakeBuff);
-					handshakeMessage = HandshakeMessage.decodeMessage(handshakeBuff);
-					if(handshakeMessage.getHeaderString().equals("P2PFILESHARINGPROJ"))
+					handshakeMessage = HandshakeMessage.convertToMessage(handshakeBuff);
+					if(handshakeMessage.header.equals("P2PFILESHARINGPROJ"))
 					{
-						remotePeerId = handshakeMessage.getPeerIDString();
+						remotePeerId = handshakeMessage.peerId;
 						
 						peerProcess.print(ownPeerId + " makes a connection to Peer " + remotePeerId);
 						peerProcess.print(ownPeerId + " Received a HANDSHAKE message from Peer " + remotePeerId);
@@ -336,8 +336,8 @@ public class RemotePeerHandler implements Runnable
 						||dataMessage.typeOfMsg.equals("1")
 						||dataMessage.typeOfMsg.equals("2")
 						||dataMessage.typeOfMsg.equals("3")){
-					dataMsgWrapper.dataMsg = dataMessage;
-					dataMsgWrapper.fromPeerID = this.remotePeerId;
+					dataMsgWrapper.data = dataMessage;
+					dataMsgWrapper.source = this.remotePeerId;
 					peerProcess.offer(dataMsgWrapper);
 				}
 				else {
@@ -356,8 +356,8 @@ public class RemotePeerHandler implements Runnable
 					System.arraycopy(dataBuffPayload, 0, dataBuffWithPayload, 4 + 1, dataBuffPayload.length);
 					
 					Data dataMsgWithPayload = Data.decodeMessage(dataBuffWithPayload);
-					dataMsgWrapper.dataMsg = dataMsgWithPayload;
-					dataMsgWrapper.fromPeerID = remotePeerId;
+					dataMsgWrapper.data = dataMsgWithPayload;
+					dataMsgWrapper.source = remotePeerId;
 					peerProcess.offer(dataMsgWrapper);
 					dataBuffPayload = null;
 					dataBuffWithPayload = null;
