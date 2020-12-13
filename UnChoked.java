@@ -84,7 +84,6 @@ public class UnChoked  extends TimerTask {
 			
 			peerProcess.peersMap.get(p.peerId).isOptUnchokedNeighbor = 1;
 			peerProcess.unchokedNeighbors.put(p.peerId, peerProcess.peersMap.get(p.peerId));
-			// LOG 4:
 			peerProcess.print(peerProcess.peerId + " has the optimistically unchoked neighbor " + p.peerId);
 			
 			if (peerProcess.peersMap.get(p.peerId).isChoked == 1)

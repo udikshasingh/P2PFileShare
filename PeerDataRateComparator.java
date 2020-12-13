@@ -5,9 +5,9 @@ public class PeerDataRateComparator implements Comparator<RemotePeerInfo> {
 	private boolean constructor1 ;
 
 	// Default Constructor
-	public PeerDataRateComparator() {
-		this.constructor1 = true;
-	}
+//	public PeerDataRateComparator() {
+//		this.constructor1 = true;
+//	}
 
 	// Parameterized Constructor
 	public PeerDataRateComparator(boolean constructor) {
