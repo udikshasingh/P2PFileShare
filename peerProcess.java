@@ -157,7 +157,7 @@ public class peerProcess
 		
 				}
 			
-			mainThread = new Thread(new MessageProcessor(peerId));
+			mainThread = new Thread(new ConnectionManager(peerId));
 			mainThread.start();
 			
 			if(isPrimary)

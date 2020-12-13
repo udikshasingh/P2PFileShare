@@ -10,7 +10,7 @@ CLASSES = \
 	Source.java \
 	Handshake.java \
 	Server.java \
-	MessageProcessor.java \
+	ConnectionManager.java \
 	PeerDataRateComparator.java \
 	peerProcess.java \
 	Piece.java \

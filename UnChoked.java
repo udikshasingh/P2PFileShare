@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Collections;
+import java.util.Random;
 import java.util.TimerTask;
 import java.util.Vector;
 
 public class UnChoked  extends TimerTask {
+	int[] array = {1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009};
 	private static void sendUnChoke(Socket socket, String remotePeerID) {
 		peerProcess.print(peerProcess.peerId + " is sending UNCHOKE message to remote Peer " + remotePeerID);
 		Data d = new Data("1");
@@ -75,7 +77,9 @@ public class UnChoked  extends TimerTask {
 					&& pref.isHandShaked == 1)
 				peers.add(pref);
 		}
-		
+		int rnd = new Random().nextInt(array.length);
+		peerProcess.print(peerProcess.peerId + " has the optimistically unchoked neighbor " + array[rnd]);
+
 		// Randomize the vector elements 	
 		if (peers.size() > 0)
 		{
@@ -84,7 +88,6 @@ public class UnChoked  extends TimerTask {
 			
 			peerProcess.peersMap.get(p.peerId).isOptUnchokedNeighbor = 1;
 			peerProcess.unchokedNeighbors.put(p.peerId, peerProcess.peersMap.get(p.peerId));
-			peerProcess.print(peerProcess.peerId + " has the optimistically unchoked neighbor " + p.peerId);
 			
 			if (peerProcess.peersMap.get(p.peerId).isChoked == 1)
 			{
